@@ -195,7 +195,7 @@ def convert_tree_to_df(root, tags):
 def unzip_to_txt(data_dir, fp_unzip, tags):
     temp_dir = data_dir + 'temp/'
     out_dir = data_dir + 'out/'
-    fp_txt = out_dir + fp_unzip.replace('.', '_') + '.txt'
+    fp_txt = out_dir + 'light_dump_' + fp_unzip.replace('.', '_') + '.txt'
     fp_unzip = fp_unzip
     # USAGE
     context = etree.iterparse(temp_dir + fp_unzip,
@@ -449,9 +449,11 @@ def process_data(
 # ---------------------------------------------------------------------
 
 def analyze_m_stat_data(data_dir='data/',
-                 raw_data='temp_data/en_wiki.txt'):
+                 raw_data='en_wiki.txt'):
+
+    out_dir = data_dir + 'out/'
     # Resulting M statistic
-    page_id_write_obj = open(data_dir + 'out/' + raw_data.split('/')[-1],
+    page_id_write_obj = open(out_dir + 'm_stat_' + raw_data,
             'w+', newline='')
     page_id_fp_csv_writer = writer(page_id_write_obj)
 
@@ -467,7 +469,7 @@ def analyze_m_stat_data(data_dir='data/',
 
     line_num = -1
     # Iterates through each line in the light dump file
-    for line in open(raw_data):
+    for line in open(out_dir + raw_data):
         line_num += 1
         # Removes end newline characters
         line = line.rstrip()
