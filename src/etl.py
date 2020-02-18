@@ -123,13 +123,27 @@ def convert_tree_light_format(root, fp_txt):
     for page_el in root.iterfind(xpath_dict['page'], namespaces=nsmap):
         page_title = get_tag_if_exists(page_el, 'page_title')
         fh.write(page_title + '\n')
-        lines = []
-        rev_mapper = {}
-        rev_count = 1
+        
+        time_mapper = {}
         for rev_el in page_el.iterfind(xpath_dict['revision'],
                                        namespaces=nsmap):
-            timestamp = '^^^_' + get_tag_if_exists(rev_el, cols[0])
+            timestamp = get_tag_if_exists(rev_el, cols[0])
             curr_rev = get_tag_if_exists(rev_el, cols[1])
+            contr_el = rev_el.find(xpath_dict['contributor'], namespaces=nsmap)
+            user = get_tag_if_exists(contr_el, cols[2])
+            if not user:
+                user = get_tag_if_exists(contr_el, 'user_ip')
+            if user:
+                user = user.replace(' ', '_')
+            curr_line = (curr_rev, user)
+            time_mapper[timestamp] = curr_line
+            
+        rev_mapper = {}
+        rev_count = 1
+        lines = []
+        for time in sorted(time_mapper.keys()):
+            curr_rev, user = time_mapper[time][0], time_mapper[time][1]
+            timestamp = '^^^_' + time
             if curr_rev not in rev_mapper:
                 rev_mapper[curr_rev] = rev_count
                 rev_count += 1
@@ -137,13 +151,9 @@ def convert_tree_light_format(root, fp_txt):
             else:
                 revert_flag = 1
             curr_rev = rev_mapper[curr_rev]
-            contr_el = rev_el.find(xpath_dict['contributor'], namespaces=nsmap)
-            user = get_tag_if_exists(contr_el, cols[2])
-            user = user.replace(' ', '_')
-            if not user:
-                user = get_tag_if_exists(contr_el, 'user_ip')
-            lines.append('{} {} {} {}\n'.format(timestamp, revert_flag,
-                                              curr_rev, user))
+            curr_line = '{} {} {} {}\n'.format(timestamp, revert_flag,
+                                             curr_rev, user)
+            lines.append(curr_line)
         fh.writelines(lines[::-1])
         del lines
 
@@ -408,7 +418,8 @@ def get_data(
         elif fp_type == 1:
             print('File already downloaded : - )')
             if fp_zip not in os.listdir(raw_dir):
-                shutil.copyfile(fp_zip, raw_dir + fp_zip.split('/')[-1])
+                shutil.copyfile(data_dir + fp_zip,
+                                raw_dir + fp_zip.split('/')[-1])
         print('Now unpacking/unzipping zip.')
         fp_unzip = unpack_zip(raw_dir=raw_dir, temp_dir=temp_dir,
                               fp_zip=fp_zip)
