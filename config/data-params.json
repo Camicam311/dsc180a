@@ -1,0 +1,7 @@
+{
+    "data_dir": "data/",
+    "fps": ["https://dumps.wikimedia.org/enwiki/20200101/enwiki-20200101-pages-meta-history1.xml-p10p1036.7z",
+            "https://dumps.wikimedia.org/enwiki/20200101/enwiki-20200101-pages-meta-history1.xml-p1037p2031.7z"],
+    "fp_type": 0
+}
+

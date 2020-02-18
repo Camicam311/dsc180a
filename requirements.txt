@@ -1,0 +1,10 @@
+pandas
+urllib
+zipfile
+lxml
+copy
+py7zr
+shutil
+sys
+os
+csv
