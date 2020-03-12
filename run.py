@@ -15,6 +15,9 @@ M_STAT_PARAMS = 'config/m-stat-params.json'
 TEST_DATA_PARAMS = 'config/test-data-params.json'
 TEST_PROCESS_PARAMS = 'config/test-process-params.json'
 TEST_M_STAT_PARAMS = 'config/test-m-stat-params.json'
+OBAMA_DATA_PARAMS = 'config/obama-data-params.json'
+OBAMA_PROCESS_PARAMS = 'config/obama-process-params.json'
+OBAMA_M_STAT_PARAMS = 'config/obama-m-stat-params.json'
 
 
 def load_params(fp):
@@ -63,12 +66,12 @@ def main(targets):
         analyze_m_stat_data(**cfg)
 
     if 'complete' in targets:
-        cfg = load_params(DATA_PARAMS)
+        cfg = load_params(OBAMA_DATA_PARAMS)
         get_data(**cfg)
         remove_dir('data/raw')
-        cfg = load_params(PROCESS_PARAMS)
+        cfg = load_params(OBAMA_PROCESS_PARAMS)
         process_data(**cfg)
-        cfg = load_params(M_STAT_PARAMS)
+        cfg = load_params(OBAMA_M_STAT_PARAMS)
         analyze_m_stat_data(**cfg)
 
     return
