@@ -6,7 +6,7 @@ import shutil
 
 
 sys.path.insert(0, 'src') # add library code to path
-from src.etl import get_data, process_data
+from src.etl import get_data, process_data, remove_dir
 from src.m_stat import analyze_m_stat_data
 
 DATA_PARAMS = 'config/data-params.json'
@@ -60,6 +60,15 @@ def main(targets):
     # runs m-statistic on processed test data
     if 'test-m-stat' in targets:
         cfg = load_params(TEST_M_STAT_PARAMS)
+        analyze_m_stat_data(**cfg)
+
+    if 'complete' in targets:
+        cfg = load_params(DATA_PARAMS)
+        get_data(**cfg)
+        remove_dir('data/raw')
+        cfg = load_params(PROCESS_PARAMS)
+        process_data(**cfg)
+        cfg = load_params(M_STAT_PARAMS)
         analyze_m_stat_data(**cfg)
 
     return

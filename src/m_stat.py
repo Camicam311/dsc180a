@@ -7,7 +7,16 @@ from csv import writer
 # Helper Functions for Getting M-Statistic
 # ---------------------------------------------------------------------
 def get_m_stat(rev_order, editor_order, num_edits_dict):
-    # Reverses based on reading from latest revision
+    """
+    Gets the M-Statistic from the order of revisions, order of editors, and
+    the number of edits for each editor in a given article
+    :param rev_order: Order of revisions/edits
+    :param editor_order: Order of editors
+    :param num_edits_dict: Map each editor to respective number of edits
+    :return: M-Statistic
+    """
+    # Reverses because light dump is in descending order
+    # (i.e. latest to earliest)
     rev_order = rev_order[::-1]
     editor_order = editor_order[::-1]
 
@@ -26,6 +35,9 @@ def get_m_stat(rev_order, editor_order, num_edits_dict):
     # Iterate across the revisions
     for i in range(len(rev_order)):
         # Runs when revision is a revert
+        # Reverts point to previous edits, so it should have a smaller revision
+        # number than if it were to incrementally increase if it were a normal
+        # edit
         if rev_order[i] < next_val:
             try:
                 # Previous editor maps from the rev_map to the index of
@@ -38,10 +50,10 @@ def get_m_stat(rev_order, editor_order, num_edits_dict):
 
                 # Current editor will be at the same index as in rev_order
                 curr_editor = editor_order[i]
-
                 # Ignore case of editor reverting themselves
                 if prev_editor == curr_editor:
                     continue
+
                 # Minimum of the number of the edits between the editors
                 curr_m_val = min(num_edits_dict[prev_editor],
                                  num_edits_dict[curr_editor])
@@ -84,6 +96,22 @@ def get_m_stat(rev_order, editor_order, num_edits_dict):
 
 def update_line(line, editor_mapper, editor_count, num_edits_dict,
                 editor_order, rev_order):
+    """
+    Updates various tracking dictionaries for future use in calculating
+    M-Statistic with values extracted from a line in the light dump data
+    Example light dump formatted line:
+        ^^^_2019-05-17T01:24:12Z 0 493 JJMC89
+        ^^^[datetime] [flag for revert] [edit number] [editor name/IP address]
+    We only really need the edit number and editor name/IP address, which
+    can be reasoned in get_m_stat()
+    :param line: Current line in light dump
+    :param editor_mapper: Maps editors to a unique identifier
+    :param editor_count: Number of editors seen thus far in an article
+    :param num_edits_dict: Maps editor id to number of respective edits
+    :param editor_order: Ordering so far of editor
+    :param rev_order: Revision order
+    :return: Updated number of editors
+    """
     line = line.split()
     if line[3] not in editor_mapper:
         editor_mapper[line[3]] = editor_count
@@ -95,30 +123,109 @@ def update_line(line, editor_mapper, editor_count, num_edits_dict,
     return editor_count
 
 
-def grab_m_stat_over_time(raw_data, data_dir='data/'):
+# ---------------------------------------------------------------------
+# Driver Function for GETTING M_STATISTICS
+# ---------------------------------------------------------------------
+
+def analyze_m_stat_data(data_dir='data/',
+                        fps=
+                        ("light-dump-enwiki-20200101-pages-meta-history1-" +
+                         "xml-p10p1036.txt",
+                         "light-dump-enwiki-20200101-pages-meta-history1-"
+                         "xml-p1037p2031.txt")
+                        ):
+    """
+    Gets the M-Statistic for each article in the light dump formatted data
+    :param data_dir: directory where the data lies within : - )
+    :param fps: Filepaths
+    """
+
+    out_dir = '{}out/'.format(data_dir)
+
+    # Maintain for page_id
+    page_count = 0
+
+    # Iterate through filepaths
+    for fp in fps:
+        # Writer for current filepath
+        page_id_write_obj = \
+            open(
+                '{}m-stat-{}'.format(out_dir, fp.replace('light-dump-', '')),
+                'w', newline=''
+            )
+        page_id_fp_csv_writer = writer(page_id_write_obj)
+
+        # Starter csv header
+        title_id, title, m_stat_val = 'Title_ID', 'Title', 'Statistic'
+
+        # Initializes for no good reason
+        editor_order, num_edits_dict, editor_mapper, rev_order, editor_count =\
+            [], {}, {}, [], 0
+
+        line_num = -1
+        # Iterates through each line in the light dump file
+        for line in open(out_dir + fp):
+            line_num += 1
+            # Removes end newline characters
+            line = line.rstrip()
+
+            # Passes at the start of the next article
+            if '^^^' != line[:3]:
+                # Calculcates M-Statistic
+                if not m_stat_val:
+                    m_stat_val = get_m_stat(rev_order, editor_order,
+                                            num_edits_dict)
+                # Writes article_id, title, and M-Statistic to file
+                page_id_fp_csv_writer.writerow([title_id, title, m_stat_val])
+
+                # Sets up for next article
+                title_id, title, m_stat_val = page_count, line, None
+                editor_order, num_edits_dict, editor_mapper, rev_order = \
+                    [], {}, {}, []
+                editor_count = 0
+                page_count += 1
+                if not page_count % 100000:
+                    print('Done parsing', page_count, 'pages')
+                continue
+
+            # Updates the necessary information used to calculate the M-Stat
+            editor_count = update_line(line, editor_mapper, editor_count,
+                                       num_edits_dict, editor_order, rev_order)
+
+        # Last article edge case
+        if not m_stat_val:
+            m_stat_val = get_m_stat(rev_order, editor_order, num_edits_dict)
+            page_id_fp_csv_writer.writerow([title_id, title, m_stat_val])
+        print('Done with {}!'.format(fp))
+
+
+# ---------------------------------------------------------------------
+# Driver Function for GETTING M STATISTIC OVER TIME
+# ---------------------------------------------------------------------
+
+def grab_m_stat_over_time(fp, data_dir='data/'):
     """
     Intended for only getting the M-Statistic over time for plotting
     Used when raw_data is just one file with the history of just one page
-    :param raw_data: The raw light dump file with just one article
+    :param fp: The raw light dump filepath with just one article
     :param data_dir: The directory for output
     :return: None
     """
     # File location for resulting M-Statistic over time
     page_id_write_obj = \
         open('{}out/overtime-{}'.format(
-            data_dir,raw_data.split('/')[-1].replace('.txt', '.csv')),
+            data_dir, fp.split('/')[-1].replace('.txt', '.csv')),
             'w+', newline=''
         )
     page_id_fp_csv_writer = writer(page_id_write_obj)
 
-    # Initializes for no good reason
     editor_order, num_edits_dict, editor_mapper, rev_order, editor_count = \
         [], {}, {}, [], 0
 
     line_num = -1
     page_id_fp_csv_writer.writerow(['Timestamp', 'M-Statistic'])
     # Iterates through each line in the light dump file
-    for line in reversed(list(open(raw_data))):
+    for line in reversed(list(open(fp))):
         line_num += 1
         # Removes end newline characters
         line = line.rstrip()
@@ -135,67 +242,3 @@ def grab_m_stat_over_time(raw_data, data_dir='data/'):
             pd.to_datetime(line.split()[0][4:]), m_stat_val
             ])
     print('Done')
-
-
-# ---------------------------------------------------------------------
-# Driver Function for ANALYZING DATA
-# ---------------------------------------------------------------------
-
-def analyze_m_stat_data(data_dir='data/',
-                        fps=
-                        ("light-dump-enwiki-20200101-pages-meta-history1-" +
-                         "xml-p10p1036.txt",
-                         "light-dump-enwiki-20200101-pages-meta-history1-"
-                         "xml-p1037p2031.txt")
-                        ):
-
-    for fp in fps:
-        out_dir = '{}out/'.format(data_dir)
-        # Resulting M statistic
-        page_id_write_obj = \
-            open(
-                '{}m-stat-{}'.format(out_dir, fp.replace('light-dump-', '')),
-                'w', newline=''
-            )
-        page_id_fp_csv_writer = writer(page_id_write_obj)
-
-        # Maintain for page_id
-        page_count = 0
-
-        # Starter csv header
-        title_id, title, m_stat_val = 'Title_ID', 'Title', 'Statistic'
-
-        # Initializes for no good reason
-        editor_order, num_edits_dict, editor_mapper, rev_order, editor_count =\
-            [], {}, {}, [], 0
-
-        line_num = -1
-        # Iterates through each line in the light dump file
-        for line in open(out_dir + fp):
-            line_num += 1
-            # Removes end newline characters
-            line = line.rstrip()
-
-            # Start of next page
-            if '^^^' != line[:3]:
-                if not m_stat_val:
-                    m_stat_val = get_m_stat(rev_order, editor_order,
-                                            num_edits_dict)
-                page_id_fp_csv_writer.writerow([title_id, title, m_stat_val])
-
-                title_id, title, m_stat_val = page_count, line, None
-                page_count += 1
-                if not page_count % 100000:
-                    print('Done parsing', page_count, 'pages')
-
-                editor_order, num_edits_dict, editor_mapper, rev_order = \
-                    [], {}, {}, []
-                editor_count = 0
-                continue
-
-            editor_count = update_line(line, editor_mapper, editor_count,
-                                       num_edits_dict, editor_order, rev_order)
-        if not m_stat_val:
-            m_stat_val = get_m_stat(rev_order, editor_order, num_edits_dict)
-            page_id_fp_csv_writer.writerow([title_id, title, m_stat_val])
-        print('Done!')

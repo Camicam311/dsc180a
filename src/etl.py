@@ -6,6 +6,7 @@ from py7zr import unpack_7zarchive
 import shutil
 import os
 import pandas as pd
+from csv import writer
 
 # Paths are as follows
 # i.e. Page: page_id, page_title
@@ -133,15 +134,25 @@ def get_tag_if_exists(parent, tag):
 
 
 def convert_tree_light_format(root, out_dir, fp_txt):
+    """
+    Converts from the XML tree to light formatted data
+    :param root: Root of tree
+    :param out_dir: Ouput directory
+    :param fp_txt: Filepath for output
+    """
     fh = open(out_dir + fp_txt, 'a')
     cols = ['timestamp', 'edit', 'username']
     for page_el in root.iterfind(xpath_dict['page'], namespaces=nsmap):
         page_title = get_tag_if_exists(page_el, 'page_title')
         fh.write(page_title + '\n')
 
+        # Keeps of edits by their time
+        # Tragically ugly but necessary because raw dumps are not in
+        # chronological order
         time_mapper = {}
         for rev_el in page_el.iterfind(xpath_dict['revision'],
                                        namespaces=nsmap):
+            # Grabs necessary information: time, edit text, username/ip
             timestamp = get_tag_if_exists(rev_el, cols[0])
             curr_rev = get_tag_if_exists(rev_el, cols[1])
             contr_el = rev_el.find(xpath_dict['contributor'], namespaces=nsmap)
@@ -149,16 +160,24 @@ def convert_tree_light_format(root, out_dir, fp_txt):
             if not user:
                 user = get_tag_if_exists(contr_el, 'user_ip')
             if user:
+                # Any spaces in usernames are replaced with underscores
                 user = user.replace(' ', '_')
             curr_line = (curr_rev, user)
+            #
             time_mapper[timestamp] = curr_line
 
-        rev_mapper = {}
-        rev_count = 1
-        lines = []
+        # Rev_mapper keeps track of each revision's text because that's
+        # how each revert is tracked
+        # (WHICH IS SUPER FUCKING SPACE INEFFICIENT. BUT IDK, DOES ANYONE HAVE
+        # A BETTER FUCKING IDEA. FUCKING CS NIGHTMARE HERE. WIKIMEDIA NEEDS TO
+        # FIX THIS SHIT)
+        rev_mapper, rev_count, lines =\
+            {}, 1, []
+        # Iterates across each edit in chronological order
         for time in sorted(time_mapper.keys()):
             curr_rev, user = time_mapper[time][0], time_mapper[time][1]
             timestamp = '^^^_' + time
+            # Checks if edit was seen before and thus it was a revert
             if curr_rev not in rev_mapper:
                 rev_mapper[curr_rev] = rev_count
                 rev_count += 1
@@ -267,12 +286,12 @@ def unpack_zip(raw_dir, temp_dir, fp_zip):
     return fp_unzip
 
 
-def remove_dir(temp_dir):
-    shutil.rmtree(temp_dir, ignore_errors=True)
+def remove_dir(dir_to_remove):
+    shutil.rmtree(dir_to_remove, ignore_errors=True)
 
 
 # ---------------------------------------------------------------------
-# Driver Function for GETTING DATA
+# Driver Function for EXTRACTING AND UNZIPPING COMPRESSED DATA/URLS
 # ---------------------------------------------------------------------
 
 def get_data(
@@ -324,7 +343,7 @@ def get_data(
 
 
 # ---------------------------------------------------------------------
-# Driver Function for PROCESSING DATA
+# Driver Function for CONVERTING UNZIPPED XML FILE TO READBLE FORMATS
 # ---------------------------------------------------------------------
 
 def process_data(
@@ -349,3 +368,55 @@ def process_data(
         print('Starting with {}'.format(fp_unzip))
         unzip_to_txt(data_dir=data_dir, fp_unzip=fp_unzip, tags=tags,
                      out_format=out_format)
+
+# ---------------------------------------------------------------------
+# Driver Function for EXTRACTING SPECIFIC ARTICLES FROM LIGHT DUMP DATA
+# ---------------------------------------------------------------------
+
+def extract_article(
+        data_dir='data/',
+        fps=(
+        "light-dump-enwiki-20200201-pages-meta-history1-xml-p10p1036.txt",
+        "light-dump-enwiki-20200201-pages-meta-history1-xml-p1037p2028.txt",
+        "light-dump-enwiki-20200201-pages-meta-history1-xml-p2029p3248.txt",
+        "light-dump-enwiki-20200201-pages-meta-history1-xml-p3249p3957.txt",
+        "light-dump-enwiki-20200201-pages-meta-history1-xml-p3958p4621.txt",
+        "light-dump-enwiki-20200201-pages-meta-history1-xml-p4622p5389.txt",
+        "light-dump-enwiki-20200201-pages-meta-history1-xml-p5390p6014.txt"
+        ),
+        desired_articles=('Anarchism', 'Barack Obama')
+):
+
+    out_dir = '{}out/'.format(data_dir)
+    desired_articles = set(desired_articles)
+
+    # Iterate through filepaths
+    for fp in fps:
+        curr_article_desired, curr_lines = None, []
+        # Iterates through each line in the light dump file
+        for line in open(out_dir + fp):
+            # Removes end newline characters
+            line = line.rstrip()
+
+            # Passes at the start of the next article
+            if '^^^' != line[:3]:
+                # Writes article text to file
+                if curr_article_desired:
+                    desired_article_out_fp =\
+                        '{}out/light-dump-{}'.format(
+                            data_dir, curr_article_desired.replace(' ', '-')
+                        )
+                    curr_write_obj = \
+                        open(desired_article_out_fp, 'w+', newline='')
+                    fp_csv_writer = writer(curr_write_obj)
+                    for curr_line in curr_lines:
+                        fp_csv_writer.writerow(curr_line)
+                    curr_article_desired, curr_lines = False, []
+                    print('Extracted {} to {}'.format(curr_article_desired,
+                                                      desired_article_out_fp))
+                if line in desired_articles:
+                    curr_article_desired = line
+                continue
+
+            if curr_article_desired:
+                curr_lines.append(line)
