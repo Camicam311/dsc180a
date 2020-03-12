@@ -43,7 +43,7 @@ nsmap = {'ns': 'http://www.mediawiki.org/xml/export-0.10/'}
 # ---------------------------------------------------------------------
 
 def context_to_txt(context, fp_txt, out_dir, tags, out_format,
-                   page_chunk=100):
+                   page_chunk=10):
     """
     Loops through an XML object, and writes page elements per file.
     :param context:
@@ -104,11 +104,11 @@ def write_tree_to_txt(tree, root, page_num, fp_txt, out_dir, tags,
     :param light_format: Whether or not to output light format
     :return:
     """
+    print('Begin conversion just up to {}'.format(page_num))
     if light_format:
         convert_tree_light_format(root=root, out_dir=out_dir, fp_txt=fp_txt)
         print('converted up to {}'.format(page_num))
         return etree.ElementTree(), etree.Element("wikimedia")
-    print('begin conversion of {}'.format(page_num))
     df = convert_tree_to_df(root=root, tags=tags)
     print('converted up to {}'.format(page_num))
     del tree
@@ -138,7 +138,7 @@ def convert_tree_light_format(root, out_dir, fp_txt):
     for page_el in root.iterfind(xpath_dict['page'], namespaces=nsmap):
         page_title = get_tag_if_exists(page_el, 'page_title')
         fh.write(page_title + '\n')
-        
+
         time_mapper = {}
         for rev_el in page_el.iterfind(xpath_dict['revision'],
                                        namespaces=nsmap):
@@ -152,7 +152,7 @@ def convert_tree_light_format(root, out_dir, fp_txt):
                 user = user.replace(' ', '_')
             curr_line = (curr_rev, user)
             time_mapper[timestamp] = curr_line
-            
+
         rev_mapper = {}
         rev_count = 1
         lines = []
@@ -213,12 +213,12 @@ def unzip_to_txt(data_dir, fp_unzip, tags, out_format):
     temp_dir = '{}temp/'.format(data_dir)
     out_dir = '{}out/'.format(data_dir)
     fp_txt = 'light-dump-{}.txt'.format(fp_unzip.replace('.', '-'))
-    fp_unzip = fp_unzip
     # USAGE
     context = etree.iterparse(temp_dir + fp_unzip,
                               tag='{http://www.mediawiki.org/' +\
                                   'xml/export-0.10/}page',
                               encoding='utf-8')
+    print('Converting to txt')
     context_to_txt(context=context, fp_txt=fp_txt, out_dir=out_dir,
                    tags=tags, out_format=out_format)
 
@@ -346,5 +346,6 @@ def process_data(
                   "'user_ip'}. Try again")
 
     for fp_unzip in fps:
+        print('Starting with {}'.format(fp_unzip))
         unzip_to_txt(data_dir=data_dir, fp_unzip=fp_unzip, tags=tags,
                      out_format=out_format)
