@@ -1,0 +1,5 @@
+{
+    "data_dir": "test/data/",
+    "fps": ["test/enwiki-20200101-page-meta-history2.xml-ptest"],
+    "fp_type": 1
+}

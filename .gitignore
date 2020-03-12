@@ -1,8 +1,12 @@
 # don't check-in data
 data
+test/data
 
 # don't check-in secrets
 .env
 
 # python files
 __pycache__
+
+# General
+.DS_Store

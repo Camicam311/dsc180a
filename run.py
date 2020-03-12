@@ -7,10 +7,14 @@ import shutil
 
 sys.path.insert(0, 'src') # add library code to path
 from src.etl import get_data, process_data
+from src.m_stat import analyze_m_stat_data
 
 DATA_PARAMS = 'config/data-params.json'
 PROCESS_PARAMS = 'config/process-params.json'
-TEST_PARAMS = 'config/test-params.json'
+M_STAT_PARAMS = 'config/m-stat-params.json'
+TEST_DATA_PARAMS = 'config/test-data-params.json'
+TEST_PROCESS_PARAMS = 'config/test-process-params.json'
+TEST_M_STAT_PARAMS = 'config/test-m-stat-params.json'
 
 
 def load_params(fp):
@@ -33,15 +37,30 @@ def main(targets):
         cfg = load_params(DATA_PARAMS)
         get_data(**cfg)
 
+    # make the test data target
+    if 'test-data' in targets:
+        cfg = load_params(TEST_DATA_PARAMS)
+        get_data(**cfg)
+
     # cleans and prepares the data for analysis
     if 'process' in targets:
         cfg = load_params(PROCESS_PARAMS)
         process_data(**cfg)
 
-    # make the test target
-    if 'test-data' in targets:
-        cfg = load_params(TEST_PARAMS)
-        get_data(**cfg)
+    # cleans and prepares the test data for analysis
+    if 'test-process' in targets:
+        cfg = load_params(TEST_PROCESS_PARAMS)
+        process_data(**cfg)
+
+    # runs m-statistic on processed data
+    if 'm-stat' in targets:
+        cfg = load_params(M_STAT_PARAMS)
+        analyze_m_stat_data(**cfg)
+
+    # runs m-statistic on processed test data
+    if 'test-m-stat' in targets:
+        cfg = load_params(TEST_M_STAT_PARAMS)
+        analyze_m_stat_data(**cfg)
 
     return
 
