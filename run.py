@@ -18,7 +18,7 @@ TEST_M_STAT_PARAMS = 'config/test-m-stat-params.json'
 OBAMA_DATA_PARAMS = 'config/obama-data-params.json'
 OBAMA_PROCESS_PARAMS = 'config/obama-process-params.json'
 OBAMA_M_STAT_PARAMS = 'config/obama-m-stat-params.json'
-ANARCHISM_DATA_PARAMS = 'config/anarchism-params.json'
+ANARCHISM_DATA_PARAMS = 'config/anarchism-data-params.json'
 ANARCHISM_PROCESS_PARAMS = 'config/anarchism-process-params.json'
 ANARCHISM_M_STAT_PARAMS = 'config/anarchism-m-stat-params.json'
 
