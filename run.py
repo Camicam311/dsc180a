@@ -6,12 +6,14 @@ import shutil
 
 
 sys.path.insert(0, 'src') # add library code to path
-from src.etl import get_data, process_data, remove_dir
-from src.m_stat import analyze_m_stat_data
+from src.etl import get_data, process_data, extract_article, remove_dir
+from src.m_stat import analyze_m_stat_data, grab_m_stat_over_time
 
 DATA_PARAMS = 'config/data-params.json'
 PROCESS_PARAMS = 'config/process-params.json'
 M_STAT_PARAMS = 'config/m-stat-params.json'
+EXTRACT_PARAMS = 'config/extract-params.json'
+M_STAT_OVER_TIME_PARAMS = 'config/over-time-params.json'
 TEST_DATA_PARAMS = 'config/test-data-params.json'
 TEST_PROCESS_PARAMS = 'config/test-process-params.json'
 TEST_M_STAT_PARAMS = 'config/test-m-stat-params.json'
@@ -89,6 +91,15 @@ def main(targets):
             cfg = load_params(OBAMA_M_STAT_PARAMS.replace('params', 'params-' + str(i + 1)))
             analyze_m_stat_data(**cfg)
             remove_dir('data/out')
+
+    if 'extract' in targets:
+        cfg = load_params(EXTRACT_PARAMS)
+        extract_article(**cfg)
+
+    if 'm-stat-time' in targets:
+        cfg = load_params(M_STAT_OVER_TIME_PARAMS)
+        grab_m_stat_over_time(**cfg)
+
     return
 
 

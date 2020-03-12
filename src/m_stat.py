@@ -140,7 +140,8 @@ def analyze_m_stat_data(data_dir='data/',
     :param fps: Filepaths
     """
 
-    out_dir = '{}out_m_stat/'.format(data_dir)
+    out_dir = '{}out/'.format(data_dir)
+    out_m_stat_dir = '{}out_m_stat/'.format(data_dir)
 
     # Maintain for page_id
     page_count = 0
@@ -150,7 +151,7 @@ def analyze_m_stat_data(data_dir='data/',
         # Writer for current filepath
         page_id_write_obj = \
             open(
-                '{}m-stat-{}'.format(out_dir, fp.replace('light-dump-', '')),
+                '{}m-stat-{}'.format(out_m_stat_dir, fp.replace('light-dump-', '')),
                 'w', newline=''
             )
         page_id_fp_csv_writer = writer(page_id_write_obj)
@@ -203,7 +204,9 @@ def analyze_m_stat_data(data_dir='data/',
 # Driver Function for GETTING M STATISTIC OVER TIME
 # ---------------------------------------------------------------------
 
-def grab_m_stat_over_time(fp, data_dir='data/'):
+def grab_m_stat_over_time(data_dir='data/',
+                          fps=('light-dump-Anarchism.txt',
+                               'light-dump-Barack-Obama.txt')):
     """
     Intended for only getting the M-Statistic over time for plotting
     Used when raw_data is just one file with the history of just one page
@@ -211,34 +214,38 @@ def grab_m_stat_over_time(fp, data_dir='data/'):
     :param data_dir: The directory for output
     :return: None
     """
-    # File location for resulting M-Statistic over time
-    page_id_write_obj = \
-        open('{}out/overtime-{}'.format(
-            data_dir, fp.split('/')[-1].replace('.txt', '.csv')),
-            'w+', newline=''
-        )
-    page_id_fp_csv_writer = writer(page_id_write_obj)
 
-    editor_order, num_edits_dict, editor_mapper, rev_order, editor_count = \
-        [], {}, {}, [], 0
+    out_dir = '{}out/'.format(data_dir)
 
-    line_num = -1
-    page_id_fp_csv_writer.writerow(['Timestamp', 'M-Statistic'])
-    # Iterates through each line in the light dump file
-    for line in reversed(list(open(fp))):
-        line_num += 1
-        # Removes end newline characters
-        line = line.rstrip()
+    for fp in fps:
+        # File location for resulting M-Statistic over time
+        page_id_write_obj = \
+            open('{}out/overtime-{}'.format(
+                data_dir, fp.split('/')[-1].replace('.txt', '.csv')),
+                'w+', newline=''
+            )
+        page_id_fp_csv_writer = writer(page_id_write_obj)
 
-        # Start of next page
-        if '^^^' != line[:3]:
-            continue
+        editor_order, num_edits_dict, editor_mapper, rev_order, editor_count = \
+            [], {}, {}, [], 0
 
-        editor_count = update_line(line, editor_mapper, editor_count,
-                                   num_edits_dict, editor_order, rev_order)
-        m_stat_val = get_m_stat(rev_order[::-1], editor_order[::-1],
-                                num_edits_dict)
-        page_id_fp_csv_writer.writerow([
-            pd.to_datetime(line.split()[0][4:]), m_stat_val
-            ])
-    print('Done')
+        line_num = -1
+        page_id_fp_csv_writer.writerow(['Timestamp', 'M-Statistic'])
+        # Iterates through each line in the light dump file
+        for line in reversed(list(open(out_dir + fp))):
+            line_num += 1
+            # Removes end newline characters
+            line = line.rstrip()
+
+            # Start of next page
+            if '^^^' != line[:3]:
+                continue
+
+            editor_count = update_line(line, editor_mapper, editor_count,
+                                       num_edits_dict, editor_order, rev_order)
+            m_stat_val = get_m_stat(rev_order[::-1], editor_order[::-1],
+                                    num_edits_dict)
+            page_id_fp_csv_writer.writerow([
+                pd.to_datetime(line.split()[0][4:]), m_stat_val
+                ])
+        print('Done with', fp)

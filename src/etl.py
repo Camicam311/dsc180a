@@ -369,6 +369,7 @@ def process_data(
         unzip_to_txt(data_dir=data_dir, fp_unzip=fp_unzip, tags=tags,
                      out_format=out_format)
 
+
 # ---------------------------------------------------------------------
 # Driver Function for EXTRACTING SPECIFIC ARTICLES FROM LIGHT DUMP DATA
 # ---------------------------------------------------------------------
@@ -389,34 +390,52 @@ def extract_article(
 
     out_dir = '{}out/'.format(data_dir)
     desired_articles = set(desired_articles)
+    curr_article_desired, curr_lines = None, []
 
     # Iterate through filepaths
     for fp in fps:
         curr_article_desired, curr_lines = None, []
         # Iterates through each line in the light dump file
         for line in open(out_dir + fp):
-            # Removes end newline characters
-            line = line.rstrip()
-
             # Passes at the start of the next article
             if '^^^' != line[:3]:
                 # Writes article text to file
                 if curr_article_desired:
                     desired_article_out_fp =\
-                        '{}out/light-dump-{}'.format(
+                        '{}out/light-dump-{}.txt'.format(
                             data_dir, curr_article_desired.replace(' ', '-')
                         )
-                    curr_write_obj = \
-                        open(desired_article_out_fp, 'w+', newline='')
-                    fp_csv_writer = writer(curr_write_obj)
-                    for curr_line in curr_lines:
-                        fp_csv_writer.writerow(curr_line)
-                    curr_article_desired, curr_lines = False, []
+                    with open(desired_article_out_fp, 'w+') as curr_fh:
+                        for curr_line in curr_lines:
+                            curr_fh.write(curr_line)
                     print('Extracted {} to {}'.format(curr_article_desired,
                                                       desired_article_out_fp))
+                    curr_article_desired, curr_lines = False, []
+                    if not len(desired_articles):
+                        print('Completed extraction!')
+                        return
+                line = line.rstrip()
                 if line in desired_articles:
                     curr_article_desired = line
+                    print('Beginning extraction of', line)
+                    desired_articles.remove(line)
                 continue
 
+            # Appends next line in light dump data for current article
             if curr_article_desired:
                 curr_lines.append(line)
+
+    # Writes article text to file
+    if curr_article_desired:
+        desired_article_out_fp = \
+            '{}out/light-dump-{}.txt'.format(
+                data_dir, curr_article_desired.replace(' ', '-')
+            )
+        with open(desired_article_out_fp, 'w+') as curr_fh:
+            for curr_line in curr_lines:
+                curr_fh.write(curr_line)
+        print('Extracted {} to {}'.format(curr_article_desired,
+                                          desired_article_out_fp))
+
+    for desired_article in desired_articles:
+        print('Could not extract', desired_article)
