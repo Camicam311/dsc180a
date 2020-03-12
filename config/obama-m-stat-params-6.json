@@ -1,5 +1,12 @@
 {
-    "data_dir": "data/",
+    "data_dir": "data/.txt",
     "fps": [
+        "light-dump-enwiki-20200201-pages-meta-history1-xml-p25022p25685.txt",
+        "light-dump-enwiki-20200201-pages-meta-history1-xml-p25686p26541.txt",
+        "light-dump-enwiki-20200201-pages-meta-history1-xml-p26542p27015.txt",
+        "light-dump-enwiki-20200201-pages-meta-history1-xml-p27016p27916.txt",
+        "light-dump-enwiki-20200201-pages-meta-history1-xml-p27917p28836.txt",
+        "light-dump-enwiki-20200201-pages-meta-history1-xml-p28837p29921.txt",
+        "light-dump-enwiki-20200201-pages-meta-history1-xml-p29922p30303.txt"
     ]
 }

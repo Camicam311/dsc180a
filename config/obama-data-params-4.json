@@ -1,6 +1,12 @@
 {
     "data_dir": "data/",
     "fps": [
+        "https://dumps.wikimedia.org/enwiki/20200201/enwiki-20200201-pages-meta-history1.xml-p15526p16063.7z",
+        "https://dumps.wikimedia.org/enwiki/20200201/enwiki-20200201-pages-meta-history1.xml-p16064p16773.7z",
+        "https://dumps.wikimedia.org/enwiki/20200201/enwiki-20200201-pages-meta-history1.xml-p16774p17818.7z",
+        "https://dumps.wikimedia.org/enwiki/20200201/enwiki-20200201-pages-meta-history1.xml-p17819p18653.7z",
+        "https://dumps.wikimedia.org/enwiki/20200201/enwiki-20200201-pages-meta-history1.xml-p18654p19293.7z",
+        "https://dumps.wikimedia.org/enwiki/20200201/enwiki-20200201-pages-meta-history1.xml-p19294p19935.7z"
     ],
     "fp_type": 0
 }

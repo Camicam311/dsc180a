@@ -140,7 +140,7 @@ def analyze_m_stat_data(data_dir='data/',
     :param fps: Filepaths
     """
 
-    out_dir = '{}out/'.format(data_dir)
+    out_dir = '{}out_m_stat/'.format(data_dir)
 
     # Maintain for page_id
     page_count = 0

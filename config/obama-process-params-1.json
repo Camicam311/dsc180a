@@ -1,6 +1,12 @@
 {
     "data_dir": "data/",
     "fps": [
+        "enwiki-20200201-pages-meta-history1.xml-p10p1036",
+        "enwiki-20200201-pages-meta-history1.xml-p1037p2028",
+        "enwiki-20200201-pages-meta-history1.xml-p2029p3248",
+        "enwiki-20200201-pages-meta-history1.xml-p3249p3957",
+        "enwiki-20200201-pages-meta-history1.xml-p3958p4621",
+        "enwiki-20200201-pages-meta-history1.xml-p5390p6014"
     ],
     "out_format": 0
 }

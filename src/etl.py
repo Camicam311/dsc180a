@@ -305,7 +305,7 @@ def get_data(
         fp_type=0
 ):
 
-    child_dirs = ['', 'out/', 'temp/', 'raw/']
+    child_dirs = ['', 'out/', 'temp/', 'raw/', 'out_m_stat/']
     for child_dir in child_dirs:
         if not os.path.exists(data_dir + child_dir):
             os.makedirs(data_dir + child_dir)

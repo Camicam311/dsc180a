@@ -18,6 +18,9 @@ TEST_M_STAT_PARAMS = 'config/test-m-stat-params.json'
 OBAMA_DATA_PARAMS = 'config/obama-data-params.json'
 OBAMA_PROCESS_PARAMS = 'config/obama-process-params.json'
 OBAMA_M_STAT_PARAMS = 'config/obama-m-stat-params.json'
+ANARCHISM_DATA_PARAMS = 'config/anarchism-params.json'
+ANARCHISM_PROCESS_PARAMS = 'config/anarchism-process-params.json'
+ANARCHISM_M_STAT_PARAMS = 'config/anarchism-m-stat-params.json'
 
 
 def load_params(fp):
@@ -65,15 +68,27 @@ def main(targets):
         cfg = load_params(TEST_M_STAT_PARAMS)
         analyze_m_stat_data(**cfg)
 
-    if 'complete' in targets:
-        cfg = load_params(OBAMA_DATA_PARAMS)
+    if 'anarchism' in targets:
+        cfg = load_params(ANARCHISM_DATA_PARAMS)
         get_data(**cfg)
         remove_dir('data/raw')
-        cfg = load_params(OBAMA_PROCESS_PARAMS)
+        cfg = load_params(ANARCHISM_PROCESS_PARAMS)
         process_data(**cfg)
-        cfg = load_params(OBAMA_M_STAT_PARAMS)
+        remove_dir('data/temp')
+        cfg = load_params(ANARCHISM_M_STAT_PARAMS)
         analyze_m_stat_data(**cfg)
 
+    if 'obama' in targets:
+        for i in range(6):
+            cfg = load_params(OBAMA_DATA_PARAMS.replace('params', 'params-' + str(i + 1)))
+            get_data(**cfg)
+            remove_dir('data/raw')
+            cfg = load_params(OBAMA_PROCESS_PARAMS.replace('params', 'params-' + str(i + 1)))
+            process_data(**cfg)
+            remove_dir('data/temp')
+            cfg = load_params(OBAMA_M_STAT_PARAMS.replace('params', 'params-' + str(i + 1)))
+            analyze_m_stat_data(**cfg)
+            remove_dir('data/out')
     return
 
 
