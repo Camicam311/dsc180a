@@ -2,8 +2,6 @@
 
 import sys
 import json
-import shutil
-
 
 sys.path.insert(0, 'src') # add library code to path
 from src.etl import get_data, process_data, extract_article, remove_dir
@@ -13,20 +11,17 @@ DATA_PARAMS = 'config/data-params.json'
 PROCESS_PARAMS = 'config/process-params.json'
 M_STAT_PARAMS = 'config/m-stat-params.json'
 EXTRACT_PARAMS = 'config/extract-params.json'
-OVER_TIME_DATA_PARAMS = 'config/over-time-data-params.json'
-OVER_TIME_PROCESS_PARAMS = 'config/over-time-process-params.json'
-OVER_TIME_M_STAT_PARAMS = 'config/over-time-m-stat-params.json'
-TEST_DATA_PARAMS = 'config/test-data-params.json'
-TEST_PROCESS_PARAMS = 'config/test-process-params.json'
-TEST_M_STAT_PARAMS = 'config/test-m-stat-params.json'
-LIGHT_DUMP_DATA_PARAMS = 'config/light-dump-data-params.json'
-LIGHT_DUMP_M_STAT_PARAMS = 'config/light-dump-m-stat-params.json'
-OBAMA_DATA_PARAMS = 'config/obama-data-params.json'
-OBAMA_PROCESS_PARAMS = 'config/obama-process-params.json'
-OBAMA_M_STAT_PARAMS = 'config/obama-m-stat-params.json'
-ANARCHISM_DATA_PARAMS = 'config/anarchism-data-params.json'
-ANARCHISM_PROCESS_PARAMS = 'config/anarchism-process-params.json'
-ANARCHISM_M_STAT_PARAMS = 'config/anarchism-m-stat-params.json'
+OVER_TIME_DATA_PARAMS = 'config/over-time/data-params.json'
+OVER_TIME_PROCESS_PARAMS = 'config/over-time/process-params.json'
+OVER_TIME_M_STAT_PARAMS = 'config/over-time/m-stat-params.json'
+TEST_DATA_PARAMS = 'config/test/data-params.json'
+TEST_PROCESS_PARAMS = 'config/test/process-params.json'
+TEST_M_STAT_PARAMS = 'config/test/m-stat-params.json'
+LIGHT_DUMP_DATA_PARAMS = 'config/light-dump/data-params.json'
+LIGHT_DUMP_M_STAT_PARAMS = 'config/light-dump/m-stat-params.json'
+DEEP_SEARCH_DATA_PARAMS = 'config/deep-search/data-params.json'
+DEEP_SEARCH_PROCESS_PARAMS = 'config/deep-search/process-params.json'
+DEEP_SEARCH_M_STAT_PARAMS = 'config/deep-search/m-stat-params.json'
 
 
 def load_params(fp):
@@ -40,9 +35,10 @@ def main(targets):
 
     # make the clean target
     if 'clean' in targets:
-        shutil.rmtree('data/temp', ignore_errors=True)
-        shutil.rmtree('data/out', ignore_errors=True)
-        shutil.rmtree('data/test', ignore_errors=True)
+        remove_dir('data/raw')
+        remove_dir('data/temp')
+        remove_dir('data/out')
+        remove_dir('data/out_m_stat')
 
     # make the data target
     if 'data' in targets:
@@ -83,13 +79,19 @@ def main(targets):
 
     if 'deep-search' in targets:
         for i in range(6):
-            cfg = load_params(OBAMA_DATA_PARAMS.replace('params', 'params-' + str(i + 1)))
+            cfg = load_params(DEEP_SEARCH_DATA_PARAMS.replace('params',
+                                                              'params-' +
+                                                              str(i + 1)))
             get_data(**cfg)
             remove_dir('data/raw')
-            cfg = load_params(OBAMA_PROCESS_PARAMS.replace('params', 'params-' + str(i + 1)))
+            cfg = load_params(DEEP_SEARCH_PROCESS_PARAMS.replace('params',
+                                                                 'params-' +
+                                                                 str(i + 1)))
             process_data(**cfg)
             remove_dir('data/temp')
-            cfg = load_params(OBAMA_M_STAT_PARAMS.replace('params', 'params-' + str(i + 1)))
+            cfg = load_params(DEEP_SEARCH_M_STAT_PARAMS.replace('params',
+                                                                'params-' +
+                                                                str(i + 1)))
             get_m_stat_data(**cfg)
             remove_dir('data/out')
 

@@ -6,13 +6,15 @@ from csv import writer
 # ---------------------------------------------------------------------
 # Helper Functions for Getting M-Statistic
 # ---------------------------------------------------------------------
-def get_m_stat(rev_order, editor_order, num_edits_dict):
+def get_m_stat(rev_order, editor_order, num_edits_dict, extra_stats):
     """
-    Gets the M-Statistic from the order of revisions, order of editors, and
-    the number of edits for each editor in a given article
+    Gets the M-Statistic and possibly extra statistics from the order of \
+    revisions, order of editors, and the number of edits for each editor in a
+    given article
     :param rev_order: Order of revisions/edits
     :param editor_order: Order of editors
     :param num_edits_dict: Map each editor to respective number of edits
+    :param extra_stats: Flag for extra statistics
     :return: M-Statistic
     """
     # Reverses because light dump is in descending order
@@ -86,12 +88,18 @@ def get_m_stat(rev_order, editor_order, num_edits_dict):
     # Edge case when no mutual edits
     if not len(m_val_dict):
         return 0
+    num_reverts = sum(m_val_dict.values())
     # Remove maximum pair(s)
     del m_val_dict[max_m_val]
     # Calculates M-Statistic
-    m_stat_val = (sum([k * v for k, v in m_val_dict.items()]) *
-                  len(mutual_revs_editors))
-    return m_stat_val
+    res_stats = []
+    m_stat = [sum([k * v for k, v in m_val_dict.items()]) *
+                  len(mutual_revs_editors)]
+    res_stats.append(m_stat)
+    if extra_stats:
+        res_stats.extend([len(rev_order), num_reverts, len(set(editor_order)),
+                          len(mutual_revs_editors)])
+    return res_stats
 
 
 def update_line(line, editor_mapper, editor_count, num_edits_dict,
@@ -128,16 +136,18 @@ def update_line(line, editor_mapper, editor_count, num_edits_dict,
 # ---------------------------------------------------------------------
 
 def get_m_stat_data(data_dir='data/',
-                        fps=
-                        ("light-dump-enwiki-20200101-pages-meta-history1-" +
-                         "xml-p10p1036.txt",
-                         "light-dump-enwiki-20200101-pages-meta-history1-"
-                         "xml-p1037p2031.txt")
-                        ):
+                    fps=
+                    ("light-dump-enwiki-20200101-pages-meta-history1-" +
+                     "xml-p10p1036.txt",
+                     "light-dump-enwiki-20200101-pages-meta-history1-" +
+                     "xml-p1037p2031.txt"),
+                    extra_stats=False
+                    ):
     """
     Gets the M-Statistic for each article in the light dump formatted data
     :param data_dir: directory where the data lies within : - )
     :param fps: Filepaths
+    :param extra_stats: Flag for extra statistics
     """
 
     out_dir = '{}out/'.format(data_dir)
@@ -153,14 +163,17 @@ def get_m_stat_data(data_dir='data/',
             open(
                 '{}m-stat-{}'.format(
                     out_m_stat_dir,
-                    fp.replace('light-dump-', '')
+                    fp.replace('.txt', '.csv').replace('light-dump-', '')
                 ),
                 'w', newline=''
             )
         page_id_fp_csv_writer = writer(page_id_write_obj)
 
         # Starter csv header
-        title_id, title, m_stat_val = 'Title_ID', 'Title', 'Statistic'
+        title_id, title, m_stats = 'Title_ID', 'Title', ['M-Statistic']
+        if extra_stats:
+            m_stats.extend(['Num Edits', 'Nums Reverts', 'Num Editors',
+                            'Num Mutual Editors'])
 
         # Initializes for no good reason
         editor_order, num_edits_dict, editor_mapper, rev_order, editor_count =\
@@ -175,12 +188,14 @@ def get_m_stat_data(data_dir='data/',
 
             # Passes at the start of the next article
             if '^^^' != line[:3]:
-                # Calculcates M-Statistic
-                if not m_stat_val:
-                    m_stat_val = get_m_stat(rev_order, editor_order,
-                                            num_edits_dict)
+                next_row = [title_id, title]
+                # Calculates M-Statistic
+                if not m_stats:
+                    m_stats = get_m_stat(rev_order, editor_order,
+                                         num_edits_dict, extra_stats)
+                next_row.extend(m_stats)
                 # Writes article_id, title, and M-Statistic to file
-                page_id_fp_csv_writer.writerow([title_id, title, m_stat_val])
+                page_id_fp_csv_writer.writerow(next_row)
 
                 # Sets up for next article
                 title_id, title, m_stat_val = page_count, line, None
@@ -197,9 +212,12 @@ def get_m_stat_data(data_dir='data/',
                                        num_edits_dict, editor_order, rev_order)
 
         # Last article edge case
-        if not m_stat_val:
-            m_stat_val = get_m_stat(rev_order, editor_order, num_edits_dict)
-            page_id_fp_csv_writer.writerow([title_id, title, m_stat_val])
+        if not m_stats:
+            next_row = [title_id, title]
+            m_stats = get_m_stat(rev_order, editor_order, num_edits_dict)
+            next_row.extend(m_stats)
+            page_id_fp_csv_writer.writerow(next_row)
+
         print('Done with {}!'.format(fp))
 
 
@@ -213,7 +231,7 @@ def grab_m_stat_over_time(data_dir='data/',
     """
     Intended for only getting the M-Statistic over time for plotting
     Used when raw_data is just one file with the history of just one page
-    :param fp: The raw light dump filepath with just one article
+    :param fps: The raw light dump filepaths with just one article each
     :param data_dir: The directory for output
     :return: None
     """
@@ -226,9 +244,8 @@ def grab_m_stat_over_time(data_dir='data/',
         page_id_write_obj = \
             open('{}overtime-{}'.format(
                 out_m_stat_dir,
-                fp.split('/')[-1].replace('.txt', '.csv')\
-                        .replace('light-dump-', '')),
-                'w+', newline=''
+                fp.replace('.txt', '.csv').replace('light-dump-', '')
+            ), 'w+', newline=''
             )
         page_id_fp_csv_writer = writer(page_id_write_obj)
 
