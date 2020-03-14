@@ -1,5 +1,5 @@
 {
-    "data_dir": "data/.txt",
+    "data_dir": "data/",
     "fps": [
         "light-dump-enwiki-20200201-pages-meta-history1-xml-p25022p25685.txt",
         "light-dump-enwiki-20200201-pages-meta-history1-xml-p25686p26541.txt",
