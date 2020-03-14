@@ -6,7 +6,6 @@ from py7zr import unpack_7zarchive
 import shutil
 import os
 import pandas as pd
-from csv import writer
 
 # Paths are as follows
 # i.e. Page: page_id, page_title
@@ -236,7 +235,7 @@ def unzip_to_txt(data_dir, fp_unzip, tags, out_format):
     context = etree.iterparse(temp_dir + fp_unzip,
                               tag='{http://www.mediawiki.org/' +\
                                   'xml/export-0.10/}page',
-                              encoding='utf-8')
+                              encoding='utf-8', huge_tree=True)
     print('Converting to txt')
     context_to_txt(context=context, fp_txt=fp_txt, out_dir=out_dir,
                    tags=tags, out_format=out_format)
@@ -290,6 +289,14 @@ def remove_dir(dir_to_remove):
     shutil.rmtree(dir_to_remove, ignore_errors=True)
 
 
+def get_basic_data_dirs(data_dir='data/',
+                        child_dirs=('', 'out/', 'temp/', 'raw/',
+                                    'out_m_stat/')):
+    for child_dir in child_dirs:
+        if not os.path.exists(data_dir + child_dir):
+            os.makedirs(data_dir + child_dir)
+
+
 # ---------------------------------------------------------------------
 # Driver Function for EXTRACTING AND UNZIPPING COMPRESSED DATA/URLS
 # ---------------------------------------------------------------------
@@ -306,9 +313,7 @@ def get_data(
 ):
 
     child_dirs = ['', 'out/', 'temp/', 'raw/', 'out_m_stat/']
-    for child_dir in child_dirs:
-        if not os.path.exists(data_dir + child_dir):
-            os.makedirs(data_dir + child_dir)
+    get_basic_data_dirs(data_dir, child_dirs)
     raw_dir = data_dir + 'raw/'
     temp_dir = data_dir + 'temp/'
 
@@ -343,7 +348,7 @@ def get_data(
 
 
 # ---------------------------------------------------------------------
-# Driver Function for CONVERTING UNZIPPED XML FILE TO READBLE FORMATS
+# Driver Function for CONVERTING UNZIPPED XML FILE TO READABLE FORMATS
 # ---------------------------------------------------------------------
 
 def process_data(
