@@ -127,7 +127,7 @@ def update_line(line, editor_mapper, editor_count, num_edits_dict,
 # Driver Function for GETTING M_STATISTICS
 # ---------------------------------------------------------------------
 
-def analyze_m_stat_data(data_dir='data/',
+def get_m_stat_data(data_dir='data/',
                         fps=
                         ("light-dump-enwiki-20200101-pages-meta-history1-" +
                          "xml-p10p1036.txt",
@@ -151,7 +151,10 @@ def analyze_m_stat_data(data_dir='data/',
         # Writer for current filepath
         page_id_write_obj = \
             open(
-                '{}m-stat-{}'.format(out_m_stat_dir, fp.replace('light-dump-', '')),
+                '{}m-stat-{}'.format(
+                    out_m_stat_dir,
+                    fp.replace('light-dump-', '')
+                ),
                 'w', newline=''
             )
         page_id_fp_csv_writer = writer(page_id_write_obj)
@@ -206,7 +209,7 @@ def analyze_m_stat_data(data_dir='data/',
 
 def grab_m_stat_over_time(data_dir='data/',
                           fps=('light-dump-Anarchism.txt',
-                               'light-dump-Barack-Obama.txt')):
+                               'light-dump-Abortion.txt')):
     """
     Intended for only getting the M-Statistic over time for plotting
     Used when raw_data is just one file with the history of just one page
@@ -216,12 +219,15 @@ def grab_m_stat_over_time(data_dir='data/',
     """
 
     out_dir = '{}out/'.format(data_dir)
+    out_m_stat_dir = '{}out_m_stat/'.format(data_dir)
 
     for fp in fps:
         # File location for resulting M-Statistic over time
         page_id_write_obj = \
-            open('{}out/overtime-{}'.format(
-                data_dir, fp.split('/')[-1].replace('.txt', '.csv')),
+            open('{}overtime-{}'.format(
+                out_m_stat_dir,
+                fp.split('/')[-1].replace('.txt', '.csv')\
+                        .replace('light-dump-', '')),
                 'w+', newline=''
             )
         page_id_fp_csv_writer = writer(page_id_write_obj)

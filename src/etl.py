@@ -309,13 +309,15 @@ def get_data(
             'https://dumps.wikimedia.org/enwiki/20200101/' +
             'enwiki-20200101-pages-meta-history1.xml-p1037p2031.7z'
         ),
-        fp_type=0
+        fp_type=0,
+        unzip_type=0
 ):
 
     child_dirs = ['', 'out/', 'temp/', 'raw/', 'out_m_stat/']
     get_basic_data_dirs(data_dir, child_dirs)
     raw_dir = data_dir + 'raw/'
     temp_dir = data_dir + 'temp/'
+    out_dir = data_dir + 'out/'
 
     print('Directories are made/were made')
 
@@ -339,8 +341,12 @@ def get_data(
                                     raw_dir + fp_zip.split('/')[-1])
                     fp_zip = fp_zip.split('/')[-1]
         print('Now unpacking/unzipping zip.')
-        fp_unzip = unpack_zip(raw_dir=raw_dir, temp_dir=temp_dir,
-                              fp_zip=fp_zip)
+        if not unzip_type:
+            fp_unzip = unpack_zip(raw_dir=raw_dir, temp_dir=temp_dir,
+                                  fp_zip=fp_zip)
+        else:
+            fp_unzip = unpack_zip(raw_dir=raw_dir, temp_dir=out_dir,
+                                  fp_zip=fp_zip)
         fp_unzips.append(fp_unzip)
         print('Done unzipping.')
     print('Done. The unzipped files are:', fp_unzips)
@@ -383,12 +389,6 @@ def extract_article(
         data_dir='data/',
         fps=(
         "light-dump-enwiki-20200201-pages-meta-history1-xml-p10p1036.txt",
-        "light-dump-enwiki-20200201-pages-meta-history1-xml-p1037p2028.txt",
-        "light-dump-enwiki-20200201-pages-meta-history1-xml-p2029p3248.txt",
-        "light-dump-enwiki-20200201-pages-meta-history1-xml-p3249p3957.txt",
-        "light-dump-enwiki-20200201-pages-meta-history1-xml-p3958p4621.txt",
-        "light-dump-enwiki-20200201-pages-meta-history1-xml-p4622p5389.txt",
-        "light-dump-enwiki-20200201-pages-meta-history1-xml-p5390p6014.txt"
         ),
         desired_articles=('Anarchism', 'Barack Obama')
 ):
@@ -407,8 +407,9 @@ def extract_article(
                 # Writes article text to file
                 if curr_article_desired:
                     desired_article_out_fp =\
-                        '{}out/light-dump-{}.txt'.format(
-                            data_dir, curr_article_desired.replace(' ', '-')
+                        '{}light-dump-{}.txt'.format(
+                            out_dir,
+                            curr_article_desired.replace(' ', '-')
                         )
                     with open(desired_article_out_fp, 'w+') as curr_fh:
                         for curr_line in curr_lines:
@@ -433,8 +434,8 @@ def extract_article(
     # Writes article text to file
     if curr_article_desired:
         desired_article_out_fp = \
-            '{}out/light-dump-{}.txt'.format(
-                data_dir, curr_article_desired.replace(' ', '-')
+            '{}light-dump-{}.txt'.format(
+                out_dir, curr_article_desired.replace(' ', '-')
             )
         with open(desired_article_out_fp, 'w+') as curr_fh:
             for curr_line in curr_lines:

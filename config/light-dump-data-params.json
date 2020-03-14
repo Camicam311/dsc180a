@@ -1,0 +1,9 @@
+{
+    "data_dir": "data/",
+    "fps": [
+        "http://wwm.phy.bme.hu/LD/ld_en_wiki.zip"
+    ],
+    "fp_type": 0,
+    "unzip_type": 1
+}
+
