@@ -95,7 +95,7 @@ def get_m_stat(rev_order, editor_order, num_edits_dict, extra_stats=0):
     # Edge case when no mutual edits
     if not len(m_val_dict):
         if not extra_stats:
-            return 0
+            return [0]
         return [0] + res_stats
     # Remove maximum pair(s)
     del m_val_dict[max_m_val]
