@@ -20,6 +20,7 @@ TEST_M_STAT_PARAMS = 'config/test/m-stat-params.json'
 LIGHT_DUMP_DATA_PARAMS = 'config/light-dump/data-params.json'
 LIGHT_DUMP_EXTRACT_PARAMS = 'config/light-dump/extract.json'
 LIGHT_DUMP_M_STAT_PARAMS = 'config/light-dump/m-stat-params.json'
+LIGHT_DUMP_TIME_PARAMS = 'config/light-dump/over-time-m-stat-params.json'
 DEEP_SEARCH_DATA_PARAMS = 'config/deep-search/data-params.json'
 DEEP_SEARCH_PROCESS_PARAMS = 'config/deep-search/process-params.json'
 DEEP_SEARCH_M_STAT_PARAMS = 'config/deep-search/m-stat-params.json'
@@ -79,6 +80,8 @@ def main(targets):
         extract_article(**cfg)
         cfg = load_params(LIGHT_DUMP_M_STAT_PARAMS)
         get_m_stat_data(**cfg)
+        cfg = load_params(LIGHT_DUMP_TIME_PARAMS)
+        grab_m_stat_over_time(**cfg)
 
     if 'deep-search' in targets:
         for i in range(6):
