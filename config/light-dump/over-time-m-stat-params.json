@@ -1,5 +1,5 @@
 {
-    "data_-dir": "data/",
+    "data_dir": "data/",
     "fps": [
         "light-dump-Thermodynamic-temperature.txt",
         "light-dump-Let's-Get-It-On.txt",
