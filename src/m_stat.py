@@ -272,7 +272,7 @@ def grab_m_stat_over_time(data_dir='data/',
             editor_count = update_line(line, editor_mapper, editor_count,
                                        num_edits_dict, editor_order, rev_order)
             m_stat_val = get_m_stat(rev_order[::-1], editor_order[::-1],
-                                    num_edits_dict)
+                                    num_edits_dict)[0]
             page_id_fp_csv_writer.writerow([
                 pd.to_datetime(line.split()[0][4:]), m_stat_val
                 ])
