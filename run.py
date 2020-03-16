@@ -111,6 +111,14 @@ def main(targets):
         cfg = load_params(OVER_TIME_M_STAT_PARAMS)
         grab_m_stat_over_time(**cfg)
 
+    if 'test-project' in targets:
+        cfg = load_params(TEST_DATA_PARAMS)
+        get_data(**cfg)
+        cfg = load_params(TEST_PROCESS_PARAMS)
+        process_data(**cfg)
+        cfg = load_params(TEST_M_STAT_PARAMS)
+        get_m_stat_data(**cfg)
+
     return
 
 
