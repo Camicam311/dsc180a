@@ -18,6 +18,7 @@ TEST_DATA_PARAMS = 'config/test/data-params.json'
 TEST_PROCESS_PARAMS = 'config/test/process-params.json'
 TEST_M_STAT_PARAMS = 'config/test/m-stat-params.json'
 LIGHT_DUMP_DATA_PARAMS = 'config/light-dump/data-params.json'
+LIGHT_DUMP_EXTRACT_PARAMS = 'config/light-dump/extract.json'
 LIGHT_DUMP_M_STAT_PARAMS = 'config/light-dump/m-stat-params.json'
 DEEP_SEARCH_DATA_PARAMS = 'config/deep-search/data-params.json'
 DEEP_SEARCH_PROCESS_PARAMS = 'config/deep-search/process-params.json'
@@ -74,6 +75,8 @@ def main(targets):
     if 'light-dump' in targets:
         cfg = load_params(LIGHT_DUMP_DATA_PARAMS)
         get_data(**cfg)
+        cfg = load_params(LIGHT_DUMP_EXTRACT_PARAMS)
+        extract_article(**cfg)
         cfg = load_params(LIGHT_DUMP_M_STAT_PARAMS)
         get_m_stat_data(**cfg)
 

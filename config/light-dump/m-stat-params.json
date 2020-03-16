@@ -1,5 +1,9 @@
 {
     "data_dir": "data/",
-    "fps": ["en_wiki.txt"],
+    "fps": [
+        "en_wiki.txt",
+        "light-dump-Barack-Obama.txt",
+        "light-dump-Donald-Trump.txt"
+    ],
     "extra_stats": 1
 }

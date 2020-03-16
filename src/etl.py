@@ -410,6 +410,7 @@ def extract_article(
                         '{}light-dump-{}.txt'.format(
                             out_dir,
                             curr_article_desired.replace(' ', '-')
+                            .replace('_', '-')
                         )
                     with open(desired_article_out_fp, 'w+') as curr_fh:
                         for curr_line in curr_lines:
