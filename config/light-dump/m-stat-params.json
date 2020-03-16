@@ -1,4 +1,5 @@
 {
     "data_dir": "data/",
-    "fps": ["en_wiki.txt"]
+    "fps": ["en_wiki.txt"],
+    "extra_stats": 1
 }
