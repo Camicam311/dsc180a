@@ -1,7 +1,11 @@
 {
-    "data_dir": "data/",
+    "data_-dir": "data/",
     "fps": [
-        "light-dump-Barack-Obama.txt",
-        "light-dump-List-of-hardcore-punk-bands.txt"
+        "light-dump-Thermodynamic-temperature.txt",
+        "light-dump-Let's-Get-It-On.txt",
+        "light-dump-AEK-Athens-F.C.-season-2009–10.txt",
+        "light-dump-History-of-the-Orthodox-Church.txt",
+        "light-dump-Comparison-of-e-mail-clients.txt"
+
     ]
 }
