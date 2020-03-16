@@ -1,5 +1,5 @@
 {
-    "data_dir": "test-run/data/",
+    "data_dir": "data/",
     "fps": ["test-run/enwiki-20200201-pages-meta-history13.xml-p5136923p5137305.7z"],
     "fp_type": 1
 }
