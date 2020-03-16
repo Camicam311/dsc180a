@@ -246,14 +246,6 @@ def unzip_to_txt(data_dir, fp_unzip, tags, out_format):
 
 
 def get_files_from_url(url, raw_dir):
-    if url.split('.')[-1] == '7z':
-        # Registers format to .7zip
-        try:
-            shutil.register_unpack_format('7zip', ['.7z'], unpack_7zarchive)
-            print('.7z registered for "7zip"')
-        except:
-            print('.7z is already registered for "7zip"')
-
     zip_fp = url.split('/')[-1]
     if not os.path.exists(raw_dir + zip_fp):
         urlretrieve(url, raw_dir + zip_fp)
@@ -266,6 +258,12 @@ def unpack_zip(raw_dir, temp_dir, fp_zip):
     # Unzips the current file
     prev_files = set(os.listdir(temp_dir))
     if fp_zip.split('.')[-1] == '7z':
+        # Registers format to .7zip
+        try:
+            shutil.register_unpack_format('7zip', ['.7z'], unpack_7zarchive)
+            print('.7z registered for "7zip"')
+        except:
+            print('.7z is already registered for "7zip"')
         shutil.unpack_archive(raw_dir + fp_zip, temp_dir)
     else:
         try:
