@@ -85,20 +85,24 @@ def get_m_stat(rev_order, editor_order, num_edits_dict, extra_stats):
             # rev_order/editor_order list
             rev_map[rev_order[i]] = i
             next_val += 1
-    # Edge case when no mutual edits
-    if not len(m_val_dict):
-        return 0
-    num_reverts = sum(m_val_dict.values())
-    # Remove maximum pair(s)
-    del m_val_dict[max_m_val]
-    # Calculates M-Statistic
+
     res_stats = []
-    m_stat = [sum([k * v for k, v in m_val_dict.items()]) *
-                  len(mutual_revs_editors)]
-    res_stats.append(m_stat)
+    num_reverts = sum(m_val_dict.values())
     if extra_stats:
         res_stats.extend([len(rev_order), num_reverts, len(set(editor_order)),
                           len(mutual_revs_editors)])
+
+    # Edge case when no mutual edits
+    if not len(m_val_dict):
+        if not extra_stats:
+            return 0
+        return [0] + res_stats
+    # Remove maximum pair(s)
+    del m_val_dict[max_m_val]
+    # Calculates M-Statistic
+    m_stat = [sum([k * v for k, v in m_val_dict.items()]) *
+                  len(mutual_revs_editors)]
+    res_stats = m_stat + res_stats
     return res_stats
 
 
@@ -141,7 +145,7 @@ def get_m_stat_data(data_dir='data/',
                      "xml-p10p1036.txt",
                      "light-dump-enwiki-20200101-pages-meta-history1-" +
                      "xml-p1037p2031.txt"),
-                    extra_stats=False
+                    extra_stats=0
                     ):
     """
     Gets the M-Statistic for each article in the light dump formatted data
@@ -172,7 +176,7 @@ def get_m_stat_data(data_dir='data/',
         # Starter csv header
         title_id, title, m_stats = 'Title_ID', 'Title', ['M-Statistic']
         if extra_stats:
-            m_stats.extend(['Num Edits', 'Nums Reverts', 'Num Editors',
+            m_stats.extend(['Num Edits', 'Num Reverts', 'Num Editors',
                             'Num Mutual Editors'])
 
         # Initializes for no good reason
@@ -198,7 +202,7 @@ def get_m_stat_data(data_dir='data/',
                 page_id_fp_csv_writer.writerow(next_row)
 
                 # Sets up for next article
-                title_id, title, m_stat_val = page_count, line, None
+                title_id, title, m_stats = page_count, line, None
                 editor_order, num_edits_dict, editor_mapper, rev_order = \
                     [], {}, {}, []
                 editor_count = 0
@@ -214,7 +218,8 @@ def get_m_stat_data(data_dir='data/',
         # Last article edge case
         if not m_stats:
             next_row = [title_id, title]
-            m_stats = get_m_stat(rev_order, editor_order, num_edits_dict)
+            m_stats = get_m_stat(rev_order, editor_order, num_edits_dict,
+                                 extra_stats)
             next_row.extend(m_stats)
             page_id_fp_csv_writer.writerow(next_row)
 
