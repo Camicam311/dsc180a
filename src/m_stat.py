@@ -6,7 +6,7 @@ from csv import writer
 # ---------------------------------------------------------------------
 # Helper Functions for Getting M-Statistic
 # ---------------------------------------------------------------------
-def get_m_stat(rev_order, editor_order, num_edits_dict, extra_stats):
+def get_m_stat(rev_order, editor_order, num_edits_dict, extra_stats=0):
     """
     Gets the M-Statistic and possibly extra statistics from the order of \
     revisions, order of editors, and the number of edits for each editor in a
@@ -101,7 +101,7 @@ def get_m_stat(rev_order, editor_order, num_edits_dict, extra_stats):
     del m_val_dict[max_m_val]
     # Calculates M-Statistic
     m_stat = [sum([k * v for k, v in m_val_dict.items()]) *
-                  len(mutual_revs_editors)]
+              len(mutual_revs_editors)]
     res_stats = m_stat + res_stats
     return res_stats
 
