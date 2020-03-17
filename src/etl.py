@@ -43,7 +43,7 @@ nsmap = {'ns': 'http://www.mediawiki.org/xml/export-0.10/'}
 # ---------------------------------------------------------------------
 
 def context_to_txt(context, fp_txt, out_dir, tags, out_format,
-                   page_chunk=5):
+                   page_chunk=1):
     """
     Converts the XML Tree context to some text format
     Either csv or light format
