@@ -1,8 +1,6 @@
 Assignment #3: Replication Part 2
 ===============================
 
-### Part 1 (Report)
-
 * An introduction to the problem
     * As an encyclopedia that is strives to maintian its credibility while
       still being built by the crowdsourced information, Wikipedia is
@@ -86,21 +84,22 @@ Assignment #3: Replication Part 2
 
 * Explanation of the calculation of M-Statistic
     * The M-Statistic theoretically is defined in the following equation:
-      $$M = E * \displaystyle\sum_{(N_i^d,N_j^r) < max}min(N_i^d,N_j^r)$$
+    
+      <img src="https://render.githubusercontent.com/render/math?math=M = E * \displaystyle\sum_{(N_i^d,N_j^r) < max}min(N_i^d,N_j^r)">
       
       Here, M is the M-Statistic and E is the total number of mutual editors.
-      As for $$i$$ and $$j$$ in $$N_i^d$$ and $$N_j^r$$, we are considering
+      As for <img src="https://render.githubusercontent.com/render/math?math=i"> and <img src="https://render.githubusercontent.com/render/math?math=j"> in <img src="https://render.githubusercontent.com/render/math?math=N_i^d"> and <img src="https://render.githubusercontent.com/render/math?math=N_j^r">, we are considering
       editors in an edit history in the following order:
-      $$1, ..., i - 2, i - 1, i, i + 1, ..., j - 1, j, j + 1, ...$$
-      The $$j$$ in $$N_j^r$$ references the editor who performed the revert to
-      the edit $$i - 1$$, and $$i$$ in $$N_i^d$$ would be the editor who's own
-      edit was essentially overwritten by editor $$j$$. $$N_i$$ and $$N_j$$ is
+      <img src="https://render.githubusercontent.com/render/math?math=1, ..., i - 2, i - 1, i, i + 1, ..., j - 1, j, j + 1, ...">
+      The <img src="https://render.githubusercontent.com/render/math?math=j"> in <img src="https://render.githubusercontent.com/render/math?math=N_j^r"> references the editor who performed the revert to
+      the edit <img src="https://render.githubusercontent.com/render/math?math=i - 1">, and <img src="https://render.githubusercontent.com/render/math?math=i"> in <img src="https://render.githubusercontent.com/render/math?math=N_i^d"> would be the editor who's own
+      edit was essentially overwritten by editor <img src="https://render.githubusercontent.com/render/math?math=j">. <img src="https://render.githubusercontent.com/render/math?math=N_i"> and <img src="https://render.githubusercontent.com/render/math?math=N_j"> is
       going to be the number of total edits in the current article from
-      editors $$i$$ and $$j$$ respectively.
+      editors <img src="https://render.githubusercontent.com/render/math?math=i"> and <img src="https://render.githubusercontent.com/render/math?math=j"> respectively.
       
-      A better way to explain this editor $$i$$ and $$j$$ concept would be with
-      an example. Let's say that a page has a set of edits starting from edit
-      #1 and ending with the most recent edit #5. In the edit history, each
+      A better way to explain this editor <img src="https://render.githubusercontent.com/render/math?math=i"> and <img src="https://render.githubusercontent.com/render/math?math=j"> concept would be with
+      an example. Let's say that a page has a set of edits starting from edit #1
+      and ending with the most recent edit #5. In the edit history, each
       edit will have an id like #1 or #5 that coincides with the text of each
       edit, meaning a revert to edit #1 will also have an edit id of #1. So
       let's say the edit history is #1, #2, #3, #1, #4, #5, with the respective
@@ -108,20 +107,20 @@ Assignment #3: Replication Part 2
       edit, or the second instance of edit id #1, was a revert back to the
       first edit. In this case of the revert, Ann, who was the editor for both
       edits with edit id #1, reverted and screwed over Bob, the editor of edit
-      id #2. In this example, $$j$$ in $$N_j^r$$ would be Ann and $$i$$ in
-      $$N_i^d$$ would be Bob.
+      id #2. In this example, <img src="https://render.githubusercontent.com/render/math?math=j"> in <img src="https://render.githubusercontent.com/render/math?math=N_j^r"> would be Ann and <img src="https://render.githubusercontent.com/render/math?math=i"> in
+      <img src="https://render.githubusercontent.com/render/math?math=N_i^d"> would be Bob.
       
       So, back to the equation, we are ideally trying to take into account
       every instance of a revert through the summation. For every revert, the
-      equation sums up the fewer number of total edits between editor $$i$$ and
-      editor $$j$$. This summation excludes the pair of reverts whose minimum
+      equation sums up the fewer number of total edits between editor <img src="https://render.githubusercontent.com/render/math?math=i"> and
+      editor <img src="https://render.githubusercontent.com/render/math?math=j">. This summation excludes the pair of reverts whose minimum
       between the two totals is the greatest in the summation. Then, this
-      summation is weighted by $$E$$ to take into account of the mututal editors.
+      summation is weighted by <img src="https://render.githubusercontent.com/render/math?math=E"> to take into account of the mututal editors.
       
       In my particular interpretation ignore cases when an editor reverts back
-      to the same edit multiple times (i.e. Edit $$j$$ and edit $$j + 1$$ both
-      revert back to edit $$i$$). I also ignore when the editor is simply reverting
-      back to themselves (i.e. Editor of edit $$i - 1$$ and editor of edit $$j$$ are
+      to the same edit multiple times (i.e. Edit <img src="https://render.githubusercontent.com/render/math?math=j"> and edit <img src="https://render.githubusercontent.com/render/math?math=j"> + 1 both
+      revert back to edit <img src="https://render.githubusercontent.com/render/math?math=i">). I also ignore when the editor is simply reverting
+      back to themselves (i.e. Editor of edit <img src="https://render.githubusercontent.com/render/math?math=i - 1"> and editor of edit <img src="https://render.githubusercontent.com/render/math?math=j"> are
       the same editors). My summation also takes into account of all editors,
       regardless of whether or not either or both of the editors were also mutual
       editors. I additionally count every instance of a revert, regardless of
@@ -207,13 +206,13 @@ Assignment #3: Replication Part 2
     because he was in office at the time. There are a few odd, tiny dips,
     but I can only guess that those are because certain editors that,
     previously, had been counted because they did not reach the maximum
-    number of edits by did by editting a few more times.
+    number of edits by did by editing a few more times.
     
     The article with the low M-Statistic has very random rises and jumps in the
     M-Statistic growth. This is probably due to very infrequent reverts and edits,
     and so the few spats that occur with the few mutual editors ever so often
     drive up the M-Statistic. But again, the line stabilizes like an elbow plot,
-    again showing how sparatic the M-Statistic is. Overall, it likely shows it
+    again showing how spuratic the M-Statistic is. Overall, it likely shows it
     is not quite controversial with just very few reverts between editors.
  
   * Present summary statistics (distributions, classifications, etc) of the 
@@ -242,13 +241,13 @@ Assignment #3: Replication Part 2
     expect. The average number of edits of controversial articles is close to
     2000, much higher than that of the average found in just the articles
     with reverts. Similarly, all the statistics in general are far higher for
-    just the controversial artciles, showing that the M-Statistic, or at least
+    just the controversial articles, showing that the M-Statistic, or at least
     the ones above the cutoff, are quite significant. And compared to the
     M-Statistics found by WikiWarMonitor, my project does find a different
     M-Statistic for many of the articles, but for the most part still captures
-    a relatively difinitive way of identifying controversial articles.
+    a relatively diffinitive way of identifying controversial articles.
     With now just ~25.5 thousand articles that are labelled controversial compared
-    to the ~4.5 million total articles, the M-Statistis seems to be a fair way
+    to the ~4.5 million total articles, the M-Statistic seems to be a fair way
     of finding controversial articles.
     
 * Calculate M-Statistic using [raw data](https://dumps.wikimedia.org/enwiki/20200201/) for two articles: Anarchism and Abortion
@@ -266,7 +265,7 @@ Assignment #3: Replication Part 2
     periods of time. We can see their similar shapes in the logarithmic evolution
     of them both scaled across one graph. Both evolutions steadily grow their M-Statistic,
     showing that they feature topics that continue to be regularly debated between
-    editors, with probably spikes occuring when certain "wars" occur between opposing
+    editors, with probably spikes occurring when certain "wars" occur between opposing
     sides.
     
     In the Abortion M-Statistic Evolution, we can identify particularly large
@@ -274,7 +273,7 @@ Assignment #3: Replication Part 2
     which rightfully is around when lots of laws and articles were talking about
     abortion laws in America. Again, the odd, tiny dips may be due to certain 
     editors that, previously, had been counted because they did not reach the
-    maximum number of edits but were now at the maximum by editting a few more times.
+    maximum number of edits but were now at the maximum by editing a few more times.
     
 * Critique of the short comings of M-Statistic
     * The M-Statistic unfortunately does not really take into account of the
@@ -285,15 +284,15 @@ Assignment #3: Replication Part 2
       example history of Ann, Bob, Cal, Ann, Dav, and Eve, the statistic does
       not account for the fact that Cal's edit was also overridden. Perhaps
       taking into account of Cal as a mutual editor with a lower weight than Bob,
-      but it feels like an odd way of calculating the statistic when only refering
+      but it feels like an odd way of calculating the statistic when only referring
       to Bob as the reverted editor. The statistic could also factor in page views
       for the overall score.
     
 * Discuss and validate some other measures of controversiality
     * A possible text-based statistic combined with the M-Statistic could be
-      used to measure to controvery. Additionally factoring in the other editors
-      between the $$i^{th}$$ and $$j^{th}$$ by considering them as mutual editors,
-      or just the first five closest to the $$i^{th}$$ editor. We could also
+      used to measure to controversy. Additionally factoring in the other editors
+      between the <img src="https://render.githubusercontent.com/render/math?math=i^{th}"> and <img src="https://render.githubusercontent.com/render/math?math=j^{th}"> by considering them as mutual editors,
+      or just the first five closest to the <img src="https://render.githubusercontent.com/render/math?math=i^{th}"> editor. We could also
       consider a network-based edit that is based on the text used by each editor
       or based the different clusters of editors established on a graph that
       compares their number of reverts and number of mutual editors.
@@ -309,47 +308,3 @@ Assignment #3: Replication Part 2
       exactly the code should work. The data is also quite commonly used in the
       NLP world, so it is great that we got a chance to take a peak and work
       with such a great dataset.
-
-### Part 2 (Code)
-
-Develop code in a GitHub repository that replicates the main result of
-question at hand. This repository will run the replication from
-end-to-end (data ingestion to generating the results that inform the
-reports) using best-practices described in class.
-
-You code should satisfy the following criteria:
-* Conform to the template structure of the methodology portion of the
-  course.
-* Use configuration files to parameterize the inputs of your pipeline.
-* Use a `run.py` file to put together the processing logic, using
-  commandline targets.
-* Runnable on the DSMLP servers in an existing Docker Image (either on
-  given to you (e.g. `ucsd-ets/scipy-ml`, or one created by you).
-* Use a small amount of versioned test data that quickly verifying the
-  runnability of the project.
-* A configuration file `config/env.json` that contains the following
-  information:
-  * a key `docker-image` with the value a DockerHub path (e.g. the
-    input of the `-i` flag when starting a container on the DSMLP
-    server.
-  * a key `output-paths` with the value a list of output files created
-    (the files with the results of the replication).
-* All criteria specified in assignments 1 and 2.
-
-Your code will be turned into gradescope directly from
-GitHub. Alongside inspecting the files of the repository, it will
-be graded using the following procedure:
-
-1. Your submitted repository will be uploaded to a DSMLP server.
-2. A container will be started using the specified Docker Image in
-   your repository's `env.json`
-3. In this container, the following command will be run: `python
-   run.py test-project`
-4. Running the above target will run your replication on a small
-   amount of test data. The existence/content of output test files
-   will be checked.
-
-*Note:* You should test running your project from end-to-end, by
-pulling it from GitHub and trying to run the targets yourself, in a
-clean directory! (E.g. create a directory `~/test-run/`, and clone/run
-the project in that directory).

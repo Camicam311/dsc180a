@@ -84,6 +84,7 @@ Wikipedia M-Statistic Replication Project
 
 * Explanation of the calculation of M-Statistic
     * The M-Statistic theoretically is defined in the following equation:
+    
       <img src="https://render.githubusercontent.com/render/math?math=M = E * \displaystyle\sum_{(N_i^d,N_j^r) < max}min(N_i^d,N_j^r)">
       
       Here, M is the M-Statistic and E is the total number of mutual editors.
