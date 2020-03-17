@@ -2,7 +2,7 @@
     "data_dir": "data/",
     "fps": ["en_wiki.txt"],
     "desired_articles": [
-        "Barack Obama",
+        "Barack_Obama",
         "AEK_Athens_F.C._season_2009–10"
     ]
 }
