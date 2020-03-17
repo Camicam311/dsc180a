@@ -195,9 +195,9 @@ Wikipedia M-Statistic Replication Project
   * Present the evolution of M-statistic over time for an article with high M 
     and another with low M and explain what you find
     **High M-Statistic Evolution for Barack Obama**
-    (images/high-m-stat.png)
+    <img src="images/high-m-stat.png">
     **Low M-Statistic Evolution for AEK-Athens-F.C.-season-2009–10**
-    (images/low-m-stat.png)
+    <img src="images/low-m-stat.png">
     
     The article with a high M-Statistic has a very miniscule rise at first
     around the end of 2006 until early 2008, which would correlate to around
@@ -254,11 +254,11 @@ Wikipedia M-Statistic Replication Project
   * Present the evolution of M-statistic over time (until 2019) and explain 
     what you find
     **M-Statistic Evolution for Anarchism**
-    (/images/anarchism-m-stat.png)
+    <img src="/images/anarchism-m-stat.png">
     **M-Statistic Evolution for Abortion**
-    (/images/abortion-m-stat.png)
+    <img src="/images/abortion-m-stat.png">
     **Logarithmic M-Statistic Evolution for Both**
-    (/images/log-m-stat.png)
+    <img src="/images/log-m-stat.png">
     
     Both articles have a pretty similar shape in terms of their M-Statistic growth.
     They both jump up around 2006 and have increments of large growth at various
