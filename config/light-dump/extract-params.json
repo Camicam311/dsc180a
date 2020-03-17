@@ -2,11 +2,7 @@
     "data_dir": "data/",
     "fps": ["en_wiki.txt"],
     "desired_articles": [
-        "List_of_hardcore_punk_bands",
-        "Thermodynamic_temperature",
-        "Let's_Get_It_On",
-        "AEK_Athens_F.C._season_2009–10",
-        "History_of_the_Orthodox_Church",
-        "Comparison_of_e-mail_clients"
+        "Barack Obama",
+        "AEK_Athens_F.C._season_2009–10"
     ]
 }

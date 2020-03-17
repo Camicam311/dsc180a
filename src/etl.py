@@ -305,7 +305,6 @@ def unpack_zip(raw_dir, temp_dir, fp_zip):
     :return: file path of unzipped file
     """
     # Unzips the current file
-    prev_files = set(os.listdir(temp_dir))
     if fp_zip.split('.')[-1] == '7z':
         # Registers format to .7zip
         try:
@@ -326,7 +325,8 @@ def unpack_zip(raw_dir, temp_dir, fp_zip):
 
     print('Unzipped', raw_dir + fp_zip, 'to', temp_dir)
 
-    fp_unzip = (set(os.listdir(temp_dir)) - prev_files).pop()
+    fp_unzip = max([temp_dir + file for file in os.listdir(temp_dir)],
+                   key = os.path.getctime)
 
     print('Unzipped file path:', temp_dir + fp_unzip)
     return fp_unzip
