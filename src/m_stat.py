@@ -140,11 +140,10 @@ def update_line(line, editor_mapper, editor_count, num_edits_dict,
 # ---------------------------------------------------------------------
 
 def get_m_stat_data(data_dir='data/',
-                    fps=
-                    ("light-dump-enwiki-20200101-pages-meta-history1-" +
-                     "xml-p10p1036.txt",
-                     "light-dump-enwiki-20200101-pages-meta-history1-" +
-                     "xml-p1037p2031.txt"),
+                    fps=("light-dump-enwiki-20200101-pages-meta-history1-" +
+                         "xml-p10p1036.txt",
+                         "light-dump-enwiki-20200101-pages-meta-history1-" +
+                         "xml-p1037p2031.txt"),
                     extra_stats=0
                     ):
     """
@@ -254,7 +253,7 @@ def grab_m_stat_over_time(data_dir='data/',
             )
         page_id_fp_csv_writer = writer(page_id_write_obj)
 
-        editor_order, num_edits_dict, editor_mapper, rev_order, editor_count = \
+        editor_order, num_edits_dict, editor_mapper, rev_order, editor_count =\
             [], {}, {}, [], 0
 
         line_num = -1

@@ -45,25 +45,26 @@ nsmap = {'ns': 'http://www.mediawiki.org/xml/export-0.10/'}
 def context_to_txt(context, fp_txt, out_dir, tags, out_format,
                    page_chunk=10):
     """
-    Loops through an XML object, and writes page elements per file.
-    :param context:
-    :param fp_txt:
-    :param data_dir:
-    :param tags:
-    :param out_format:
-    :param page_chunk:
-    :return:
+    Converts the XML Tree context to some text format
+    Either csv or light format
+    :param context: XML iterable context for streaming
+    :param fp_txt: File path for output
+    :param out_dir: Output directory
+    :param tags: Tags used for csv format
+    :param out_format: Format flag (0 for light_format, otherwise csv)
+    :param page_chunk: Number of pages per chunk
     """
-    page_num = 1
-
-    # create an empty tree to add XML elements to ('pages')
-    tree = etree.ElementTree()
-    root = etree.Element("wikimedia")
 
     if out_format == 0:
         light_format = True
     else:
         light_format = False
+
+    # create an empty tree to add XML elements to ('pages')
+    tree = etree.ElementTree()
+    root = etree.Element("wikimedia")
+
+    page_num = 1
 
     # loop through the large XML tree (streaming)
     for event, elem in context:
@@ -83,6 +84,8 @@ def context_to_txt(context, fp_txt, out_dir, tags, out_format,
         elem.clear()
         while elem.getprevious() is not None:
             del elem.getparent()[0]
+
+    # Edge case for extra pages in memory
     if page_num % page_chunk:
         write_tree_to_txt(
                 tree=tree, root=root, page_num=page_num, fp_txt=fp_txt,
@@ -99,48 +102,65 @@ def write_tree_to_txt(tree, root, page_num, fp_txt, out_dir, tags,
     :param root: Root node of tree
     :param page_num: Last page encoded within the tree
     :param fp_txt: File path of the txt file
-    :param data_dir: Data directory for output
+    :param out_dir: Data directory for output
     :param tags: Tags used for output
     :param light_format: Whether or not to output light format
     :return:
     """
     print('Begin conversion just up to {}'.format(page_num))
+    # If desired output is in light dump format
     if light_format:
         convert_tree_light_format(root=root, out_dir=out_dir, fp_txt=fp_txt)
         print('converted up to {}'.format(page_num))
         return etree.ElementTree(), etree.Element("wikimedia")
+
     df = convert_tree_to_df(root=root, tags=tags)
     print('converted up to {}'.format(page_num))
-    del tree
-    del root
     if not os.path.exists(out_dir + fp_txt):
         df.to_csv(out_dir + fp_txt, index=False)
         print('converted up to {} to csv'.format(page_num))
     else:
         df.to_csv(out_dir + fp_txt, mode='a', index=False, header=False)
         print('appended up to {} to csv'.format(page_num))
-    del df
+    del tree, root, df
     return etree.ElementTree(), etree.Element("wikimedia")
 
 
-# Get element text if exists
-# Else None
 def get_tag_if_exists(parent, tag):
+    """
+    Checks if tag is a child of the parent in the XML tree
+    If so, gets the Wikipedia tag format
+    :param parent: Parent node in XML tree
+    :param tag: Desired child tag
+    :return: Text within the XML tag OR None
+    """
     res = parent.find(xpath_dict[tag], namespaces=nsmap)
-    if res != None:
+    try:
         return res.text
-    return res
+    except:
+        # When tag is not child of parent and res = None
+        return res
 
 
 def convert_tree_light_format(root, out_dir, fp_txt):
     """
     Converts from the XML tree to light formatted data
+    Example formatting:
+        Anarchism
+        ^^^_2019-05-17T01:24:12Z 0 493 JJMC89
+
+        [Page title]
+        ^^^[datetime] [flag for revert] [edit number] [editor name/IP address]
     :param root: Root of tree
-    :param out_dir: Ouput directory
+    :param out_dir: Output directory
     :param fp_txt: Filepath for output
     """
+    # File Handle
     fh = open(out_dir + fp_txt, 'a')
+    # Only necessary columns
     cols = ['timestamp', 'edit', 'username']
+
+    # Iterates through every page under the current root
     for page_el in root.iterfind(xpath_dict['page'], namespaces=nsmap):
         page_title = get_tag_if_exists(page_el, 'page_title')
         fh.write(page_title + '\n')
@@ -162,7 +182,7 @@ def convert_tree_light_format(root, out_dir, fp_txt):
                 # Any spaces in usernames are replaced with underscores
                 user = user.replace(' ', '_')
             curr_line = (curr_rev, user)
-            #
+            # Maps every time to the (edit, username/IP address)
             time_mapper[timestamp] = curr_line
 
         # Rev_mapper keeps track of each revision's text because that's
@@ -178,6 +198,8 @@ def convert_tree_light_format(root, out_dir, fp_txt):
             timestamp = '^^^_' + time
             # Checks if edit was seen before and thus it was a revert
             if curr_rev not in rev_mapper:
+                # Adds new edit to dictionary that maps each edit's text
+                # to their revision ID number
                 rev_mapper[curr_rev] = rev_count
                 rev_count += 1
                 revert_flag = 0
@@ -187,12 +209,18 @@ def convert_tree_light_format(root, out_dir, fp_txt):
             curr_line = '{} {} {} {}\n'.format(timestamp, revert_flag,
                                                curr_rev, user)
             lines.append(curr_line)
+        # Reverses for descending order
         fh.writelines(lines[::-1])
         del lines
 
 
 def convert_tree_to_df(root, tags):
-
+    """
+    Converts the XML tree to a dataframe with each tag as a column
+    :param root: Root of current XML tree
+    :param tags: Desired tags
+    :return: Dataframe
+    """
     # Initializes tags for different levels within the xml format
     curr_page_level_tags = list(tags.intersection(page_level_tags))
     curr_rev_level_tags = list(tags.intersection(rev_level_tags))
@@ -228,10 +256,17 @@ def convert_tree_to_df(root, tags):
 
 
 def unzip_to_txt(data_dir, fp_unzip, tags, out_format):
+    """
+    Unzips file to desired output format
+    Currently supports only csv or light dump format
+    :param data_dir: Directory for all data
+    :param fp_unzip: File path of unzipped file
+    :param tags: Desired tags for csv format
+    :param out_format: Output format (0 for light dump, otherwise csv)
+    """
     temp_dir = '{}temp/'.format(data_dir)
     out_dir = '{}out/'.format(data_dir)
     fp_txt = 'light-dump-{}.txt'.format(fp_unzip.replace('.', '-'))
-    # USAGE
     context = etree.iterparse(temp_dir + fp_unzip,
                               tag='{http://www.mediawiki.org/' +\
                                   'xml/export-0.10/}page',
@@ -240,12 +275,18 @@ def unzip_to_txt(data_dir, fp_unzip, tags, out_format):
     context_to_txt(context=context, fp_txt=fp_txt, out_dir=out_dir,
                    tags=tags, out_format=out_format)
 
-    # Delete etree and unzipped file
+    # Delete etree
     del context
     print('Done with ' + temp_dir + fp_unzip)
 
 
 def get_files_from_url(url, raw_dir):
+    """
+    Downloads file from url
+    :param url: URL for file
+    :param raw_dir: Directory for raw data
+    :return: Returns file path for created file
+    """
     zip_fp = url.split('/')[-1]
     if not os.path.exists(raw_dir + zip_fp):
         urlretrieve(url, raw_dir + zip_fp)
@@ -255,6 +296,14 @@ def get_files_from_url(url, raw_dir):
 
 
 def unpack_zip(raw_dir, temp_dir, fp_zip):
+    """
+    Unpacks a zip file
+    Supports .7z and .zip
+    :param raw_dir: Directory for raw data containing zipped file
+    :param temp_dir: Directory for temporary data for unzipped file
+    :param fp_zip: File path of zipped file
+    :return: file path of unzipped file
+    """
     # Unzips the current file
     prev_files = set(os.listdir(temp_dir))
     if fp_zip.split('.')[-1] == '7z':
@@ -284,12 +333,21 @@ def unpack_zip(raw_dir, temp_dir, fp_zip):
 
 
 def remove_dir(dir_to_remove):
+    """
+    Removes directory
+    :param dir_to_remove: Directory to remove
+    """
     shutil.rmtree(dir_to_remove, ignore_errors=True)
 
 
 def get_basic_data_dirs(data_dir='data/',
                         child_dirs=('', 'out/', 'temp/', 'raw/',
                                     'out_m_stat/')):
+    """
+    Adds desired sub-directories to parent data directory
+    :param data_dir: Directory for data
+    :param child_dirs: Sub-directories for where data actually exists within
+    """
     for child_dir in child_dirs:
         if not os.path.exists(data_dir + child_dir):
             os.makedirs(data_dir + child_dir)
@@ -310,6 +368,19 @@ def get_data(
         fp_type=0,
         unzip_type=0
 ):
+    """
+    Gets the data from either a url or some file destination and unzips
+    the file. If file is passed in, function will copy the file over to the
+    raw data directory within the directory containing data
+    :param data_dir: Directory for data
+    :param fps: Filepaths/URLs for downloading and unzipping
+    :param fp_type: 0 for URL, 1 for actual file
+    :param unzip_type: If the unzipped file is already in a desired format
+                       (i.e. light dump format)
+                       0 for light dump format -> directly to output directory
+                       otherwise for XML format -> redirect to temp directory
+    :return: None
+    """
 
     child_dirs = ['', 'out/', 'temp/', 'raw/', 'out_m_stat/']
     get_basic_data_dirs(data_dir, child_dirs)
@@ -330,6 +401,7 @@ def get_data(
             print('Done downloading zip.')
         elif fp_type == 1:
             print('File already downloaded : - )')
+            # Copies file to raw directory if not there yet
             if fp_zip not in os.listdir(raw_dir):
                 if fp_zip in os.listdir(data_dir):
                     shutil.copyfile(data_dir + fp_zip,
@@ -339,6 +411,7 @@ def get_data(
                                     raw_dir + fp_zip.split('/')[-1])
                     fp_zip = fp_zip.split('/')[-1]
         print('Now unpacking/unzipping zip.')
+        # Directs unzip file to desired sub-directory
         if not unzip_type:
             fp_unzip = unpack_zip(raw_dir=raw_dir, temp_dir=temp_dir,
                                   fp_zip=fp_zip)
@@ -364,6 +437,14 @@ def process_data(
         tags=('page_title', 'rev_id', 'parent_id', 'username', 'user_ip'),
         out_format=0
 ):
+    """
+    Processes the XML file into more readable formats
+    Output formats possible are light dump format or csv format
+    :param data_dir: Directory for data
+    :param fps: List of file paths
+    :param tags: XML tags to store for csv format
+    :param out_format: Output format, 0 for light dump format, otherwise csv
+    """
 
     if not isinstance(tags, set):
         try:
@@ -390,6 +471,12 @@ def extract_article(
         ),
         desired_articles=('Anarchism', 'Barack Obama')
 ):
+    """
+    Extracts a desired article from a list of light dump files
+    :param data_dir: Directory for data
+    :param fps: List of light dump formatted files' paths
+    :param desired_articles: Desired article titles
+    """
 
     out_dir = '{}out/'.format(data_dir)
     desired_articles = set(desired_articles)
@@ -400,7 +487,8 @@ def extract_article(
         curr_article_desired, curr_lines = None, []
         # Iterates through each line in the light dump file
         for line in open(out_dir + fp):
-            # Passes at the start of the next article
+
+            # Passes through at the start of the next article
             if '^^^' != line[:3]:
                 # Writes article text to file
                 if curr_article_desired:
@@ -416,10 +504,13 @@ def extract_article(
                     print('Extracted {} to {}'.format(curr_article_desired,
                                                       desired_article_out_fp))
                     curr_article_desired, curr_lines = False, []
+                    # When completed all extraction and can stop early
                     if not len(desired_articles):
                         print('Completed extraction!')
                         return
                 line = line.rstrip()
+
+                # If next article in light dump is a desired article
                 if line in desired_articles:
                     curr_article_desired = line
                     print('Beginning extraction of', line)
@@ -442,5 +533,6 @@ def extract_article(
         print('Extracted {} to {}'.format(curr_article_desired,
                                           desired_article_out_fp))
 
+    # For all articles not found in the extraction process
     for desired_article in desired_articles:
         print('Could not extract', desired_article)

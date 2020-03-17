@@ -74,50 +74,58 @@ def main(targets):
 
     # m-statistic for entire light dump
     if 'light-dump' in targets:
-        cfg = load_params(LIGHT_DUMP_DATA_PARAMS)
-        get_data(**cfg)
-        cfg = load_params(LIGHT_DUMP_EXTRACT_PARAMS)
-        extract_article(**cfg)
-        cfg = load_params(LIGHT_DUMP_M_STAT_PARAMS)
-        get_m_stat_data(**cfg)
-        cfg = load_params(LIGHT_DUMP_TIME_PARAMS)
-        grab_m_stat_over_time(**cfg)
+        data_cfg = load_params(LIGHT_DUMP_DATA_PARAMS)
+        extract_cfg = load_params(LIGHT_DUMP_EXTRACT_PARAMS)
+        m_stat_cfg = load_params(LIGHT_DUMP_M_STAT_PARAMS)
+        evolution_cfg = load_params(LIGHT_DUMP_TIME_PARAMS)
 
+        get_data(**data_cfg)
+        extract_article(**extract_cfg)
+        get_m_stat_data(**m_stat_cfg)
+        grab_m_stat_over_time(**evolution_cfg)
+
+    # Searches through all thee files from Wikimedia starting with
+    # enwiki-20200201-pages-meta-history1.xml
     if 'deep-search' in targets:
         for i in range(6):
-            cfg = load_params(DEEP_SEARCH_DATA_PARAMS.replace('params',
-                                                              'params-' +
-                                                              str(i + 1)))
-            get_data(**cfg)
+            data_cfg =\
+                load_params(DEEP_SEARCH_DATA_PARAMS
+                            .replace('params', 'params-' + str(i + 1)))
+            process_cfg =\
+                load_params(DEEP_SEARCH_PROCESS_PARAMS
+                            .replace('params', 'params-' + str(i + 1)))
+            m_stat_cfg =\
+                load_params(DEEP_SEARCH_M_STAT_PARAMS
+                            .replace('params', 'params-' + str(i + 1)))
+
+            get_data(**data_cfg)
             remove_dir('data/raw')
-            cfg = load_params(DEEP_SEARCH_PROCESS_PARAMS.replace('params',
-                                                                 'params-' +
-                                                                 str(i + 1)))
-            process_data(**cfg)
+            process_data(**process_cfg)
             remove_dir('data/temp')
-            cfg = load_params(DEEP_SEARCH_M_STAT_PARAMS.replace('params',
-                                                                'params-' +
-                                                                str(i + 1)))
-            get_m_stat_data(**cfg)
+            get_m_stat_data(**m_stat_cfg)
             remove_dir('data/out')
 
+    # Complete project for generating M-Statistic Evolution
     if 'm-stat-time' in targets:
-        cfg = load_params(OVER_TIME_DATA_PARAMS)
-        get_data(**cfg)
-        cfg = load_params(OVER_TIME_PROCESS_PARAMS)
-        process_data(**cfg)
-        cfg = load_params(EXTRACT_PARAMS)
-        extract_article(**cfg)
-        cfg = load_params(OVER_TIME_M_STAT_PARAMS)
-        grab_m_stat_over_time(**cfg)
+        data_cfg = load_params(OVER_TIME_DATA_PARAMS)
+        process_cfg = load_params(OVER_TIME_PROCESS_PARAMS)
+        extract_cfg = load_params(EXTRACT_PARAMS)
+        evolution_cfg = load_params(OVER_TIME_M_STAT_PARAMS)
 
+        get_data(**data_cfg)
+        process_data(**process_cfg)
+        extract_article(**extract_cfg)
+        grab_m_stat_over_time(**evolution_cfg)
+
+    # Complete project for test set
     if 'test-project' in targets:
-        cfg = load_params(TEST_DATA_PARAMS)
-        get_data(**cfg)
-        cfg = load_params(TEST_PROCESS_PARAMS)
-        process_data(**cfg)
-        cfg = load_params(TEST_M_STAT_PARAMS)
-        get_m_stat_data(**cfg)
+        data_cfg = load_params(TEST_DATA_PARAMS)
+        process_cfg = load_params(TEST_PROCESS_PARAMS)
+        m_stat_cfg = load_params(TEST_M_STAT_PARAMS)
+
+        get_data(**data_cfg)
+        process_data(**process_cfg)
+        get_m_stat_data(**m_stat_cfg)
 
     return
 
